@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { BottomNav } from "@/components/BottomNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,12 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
-        <div className="mx-auto flex min-h-screen max-w-md flex-col">
-          <main className="flex-1">{children}</main>
-          <BottomNav />
-        </div>
-      </body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

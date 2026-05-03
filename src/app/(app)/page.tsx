@@ -7,7 +7,9 @@ import { AccountCard } from "@/components/AccountCard";
 import { SplitDonut } from "@/components/SplitDonut";
 import { TransactionRow } from "@/components/TransactionRow";
 import { Sparkline } from "@/components/Sparkline";
+import { UserAvatar } from "@/components/auth/UserAvatar";
 import { useBudgetStore } from "@/lib/store";
+import { useSupabaseUser } from "@/lib/useSupabaseUser";
 import { formatCurrency, greeting } from "@/lib/format";
 
 const KIND_COLOR: Record<string, string> = {
@@ -17,7 +19,9 @@ const KIND_COLOR: Record<string, string> = {
 };
 
 export default function HomePage() {
-  const { user, income, accounts, transactions } = useBudgetStore();
+  const { income, accounts, transactions } = useBudgetStore();
+  const supabaseUser = useSupabaseUser();
+  const firstName = supabaseUser?.firstName ?? "there";
 
   const total = accounts.reduce((sum, a) => sum + a.balance, 0);
   const totalHistory = accounts[0].history.map((_, i) =>
@@ -39,18 +43,21 @@ export default function HomePage() {
     <>
       <TopBar
         right={
-          <Link
-            href="/transactions"
-            aria-label="Add transaction"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary-ink"
-          >
-            <Plus size={18} />
-          </Link>
+          <>
+            <Link
+              href="/transactions"
+              aria-label="Add transaction"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary-ink"
+            >
+              <Plus size={18} />
+            </Link>
+            <UserAvatar />
+          </>
         }
       />
       <section className="px-4 pb-2 pt-5">
         <div className="text-[13px] text-muted">
-          {greeting()}, {user.name}.
+          {greeting()}, {firstName}.
         </div>
         <div className="mt-1 flex items-end justify-between">
           <div>

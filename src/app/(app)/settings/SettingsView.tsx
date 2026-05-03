@@ -14,6 +14,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { useBudgetStore } from "@/lib/store";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
@@ -26,8 +27,13 @@ type Item = {
   disabled?: boolean;
 };
 
-export default function SettingsPage() {
-  const { user, income, accounts } = useBudgetStore();
+type Props = {
+  displayName: string;
+  email: string | null;
+};
+
+export function SettingsView({ displayName, email }: Props) {
+  const { income, accounts } = useBudgetStore();
 
   const bills = accounts.find((a) => a.kind === "bills");
   const spending = accounts.find((a) => a.kind === "spending");
@@ -65,7 +71,11 @@ export default function SettingsPage() {
   return (
     <>
       <TopBar />
-      <PageHeader eyebrow="You" title={`${user.name}`} subtitle="Personal preferences and account setup." />
+      <PageHeader
+        eyebrow="You"
+        title={displayName}
+        subtitle={email ?? "Personal preferences and account setup."}
+      />
 
       <Section title="Money">
         {moneySection.map((item) => (
@@ -77,6 +87,10 @@ export default function SettingsPage() {
         {appSection.map((item) => (
           <Row key={item.label} item={item} />
         ))}
+      </Section>
+
+      <Section title="Account">
+        <SignOutButton />
       </Section>
 
       <p className="px-4 pb-8 pt-2 text-center text-[12px] text-muted">
