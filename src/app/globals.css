@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f8f4;
+  --surface: #ffffff;
+  --ink: #0f1a14;
+  --muted: #5c6b62;
+  --border: #e7eae3;
+  --primary: #2f7d4f;
+  --primary-soft: #e6f0ea;
+  --primary-ink: #1c4a2f;
+  --accent: #c9a227;
+  --danger: #c0463a;
+}
+
+.dark {
+  --bg: #0e1411;
+  --surface: #161d18;
+  --ink: #eef2ec;
+  --muted: #9aa8a0;
+  --border: #232b25;
+  --primary: #5fbf86;
+  --primary-soft: #1e2a22;
+  --primary-ink: #cfead9;
+  --accent: #e6c25c;
+  --danger: #e07268;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Hide scrollbars on horizontal strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

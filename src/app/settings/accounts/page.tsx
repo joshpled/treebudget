@@ -1,0 +1,118 @@
+"use client";
+
+import { CreditCard, Sprout, Receipt, TrendingUp, Plus } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
+import { PageHeader } from "@/components/PageHeader";
+import { useBudgetStore } from "@/lib/store";
+import { formatCurrency, formatPercent } from "@/lib/format";
+import type { AccountKind } from "@/lib/types";
+
+const ICONS: Record<AccountKind, LucideIcon> = {
+  bills: Receipt,
+  spending: CreditCard,
+  savings: Sprout,
+  investment: TrendingUp,
+  other: Receipt,
+};
+
+export default function AccountsPage() {
+  const { accounts } = useBudgetStore();
+
+  return (
+    <>
+      <TopBar back={{ href: "/settings", label: "Settings" }} title="Accounts" />
+      <PageHeader
+        eyebrow="Setup"
+        title="Your accounts"
+        subtitle="The 3 core accounts power the auto-split. You can add more anytime."
+      />
+
+      <section className="px-4 pb-4">
+        <h2 className="px-1 pb-2 text-[12px] font-medium uppercase tracking-wide text-muted">
+          Core accounts
+        </h2>
+        <div className="space-y-2">
+          {accounts.map((a) => {
+            const Icon = ICONS[a.kind];
+            return (
+              <div
+                key={a.id}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary-ink">
+                  <Icon size={18} strokeWidth={1.8} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14px] font-medium text-ink">
+                    {a.name}
+                    {a.isCard ? (
+                      <span className="ml-2 rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary-ink">
+                        Card
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="text-[12px] text-muted capitalize">
+                    {a.kind} · {formatPercent(a.allocation)} of income
+                  </div>
+                </div>
+                <div className="tabular text-[14px] font-semibold">
+                  {formatCurrency(a.balance, { showCents: false })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="px-4 pb-8">
+        <h2 className="px-1 pb-2 text-[12px] font-medium uppercase tracking-wide text-muted">
+          Add more
+        </h2>
+        <div className="space-y-2">
+          <AddOption
+            icon={TrendingUp}
+            title="Investment account"
+            subtitle="Brokerage, retirement, crypto"
+          />
+          <AddOption
+            icon={Receipt}
+            title="Additional checking"
+            subtitle="Joint account, side income, etc."
+          />
+          <AddOption
+            icon={Sprout}
+            title="Sub-savings"
+            subtitle="Earmark a goal under Savings"
+          />
+        </div>
+      </section>
+    </>
+  );
+}
+
+function AddOption({
+  icon: Icon,
+  title,
+  subtitle,
+}: {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-transparent px-4 py-3 text-left transition-colors hover:border-primary"
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary-ink">
+        <Icon size={18} strokeWidth={1.8} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[14px] font-medium text-ink">{title}</div>
+        <div className="text-[12px] text-muted">{subtitle}</div>
+      </div>
+      <Plus size={16} className="text-muted" />
+    </button>
+  );
+}
