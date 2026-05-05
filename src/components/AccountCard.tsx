@@ -8,6 +8,7 @@ import { Sparkline } from "./Sparkline";
 type Props = {
   account: Account;
   monthlyAllocation?: number;
+  history?: number[];
   href?: string;
 };
 
@@ -19,7 +20,12 @@ const ACCENT_BY_KIND: Record<Account["kind"], string> = {
   other: "text-ink",
 };
 
-export function AccountCard({ account, monthlyAllocation, href }: Props) {
+export function AccountCard({
+  account,
+  monthlyAllocation,
+  history = [],
+  href,
+}: Props) {
   const hint =
     account.kind === "spending"
       ? "Your card. Spend freely up to this balance."
@@ -42,7 +48,7 @@ export function AccountCard({ account, monthlyAllocation, href }: Props) {
             <span className="text-[13px] font-medium uppercase tracking-wide text-muted">
               {account.name}
             </span>
-            {account.isCard ? (
+            {account.is_card ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary-ink">
                 <CreditCard size={12} strokeWidth={2} />
                 Card
@@ -72,7 +78,7 @@ export function AccountCard({ account, monthlyAllocation, href }: Props) {
             {formatPercent(account.allocation)}
           </span>
           <div className="text-primary">
-            <Sparkline data={account.history} width={88} height={28} fill="currentColor" />
+            <Sparkline data={history} width={88} height={28} fill="currentColor" />
           </div>
         </div>
       </div>

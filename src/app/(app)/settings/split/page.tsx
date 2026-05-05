@@ -1,188 +1,35 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
-import { SplitDonut } from "@/components/SplitDonut";
-import { useBudgetStore } from "@/lib/store";
-import { formatCurrency } from "@/lib/format";
-import { cn } from "@/lib/cn";
+import { listAccounts } from "@/lib/db/accounts";
+import { getCurrentProfile } from "@/lib/db/profile";
+import { SplitEditor } from "./SplitEditor";
 
-const COLORS = {
-  bills: "#5C6B62",
-  spending: "#2F7D4F",
-  savings: "#C9A227",
-};
+export default async function SplitEditorPage() {
+  const [profile, accounts] = await Promise.all([
+    getCurrentProfile(),
+    listAccounts(),
+  ]);
 
-type Key = "bills" | "spending" | "savings";
+  const bills = accounts.find((a) => a.kind === "bills");
+  const spending = accounts.find((a) => a.kind === "spending");
+  const savings = accounts.find((a) => a.kind === "savings");
 
-export default function SplitEditorPage() {
-  const router = useRouter();
-  const { accounts, income, setIncome, setSplit } = useBudgetStore();
-
-  const initial = useMemo(() => {
-    const bills = Math.round((accounts.find((a) => a.kind === "bills")?.allocation ?? 0.5) * 100);
-    const spending = Math.round((accounts.find((a) => a.kind === "spending")?.allocation ?? 0.3) * 100);
-    const savings = 100 - bills - spending;
-    return { bills, spending, savings };
-  }, [accounts]);
-
-  const [pct, setPct] = useState(initial);
-  const [incomeInput, setIncomeInput] = useState(income);
-
-  const adjust = (key: Key, value: number) => {
-    const clamped = Math.max(0, Math.min(100, value));
-    setPct((prev) => {
-      const others: Key[] = (["bills", "spending", "savings"] as Key[]).filter(
-        (k) => k !== key,
-      );
-      const remaining = 100 - clamped;
-      const otherTotal = prev[others[0]] + prev[others[1]] || 1;
-      const next = {
-        ...prev,
-        [key]: clamped,
-        [others[0]]: Math.round((prev[others[0]] / otherTotal) * remaining),
-      };
-      next[others[1]] = 100 - next[key] - next[others[0]];
-      return next;
-    });
-  };
-
-  const total = pct.bills + pct.spending + pct.savings;
-  const valid = total === 100;
-
-  const onSave = () => {
-    setIncome(incomeInput);
-    setSplit({
-      bills: pct.bills / 100,
-      spending: pct.spending / 100,
-      savings: pct.savings / 100,
-    });
-    router.push("/");
-  };
+  const initialBills = Math.round(Number(bills?.allocation ?? 0.5) * 100);
+  const initialSpending = Math.round(Number(spending?.allocation ?? 0.3) * 100);
+  const initialSavings = 100 - initialBills - initialSpending;
 
   return (
     <>
-      <TopBar back={{ href: "/settings", label: "Settings" }} title="Income & split" />
-      <div className="px-4 pb-2 pt-4">
-        <label className="block text-[12px] font-medium uppercase tracking-wide text-muted">
-          Monthly income
-        </label>
-        <div className="mt-2 flex items-baseline gap-2 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card focus-within:border-primary">
-          <span className="text-[24px] font-semibold text-muted">$</span>
-          <input
-            type="number"
-            inputMode="decimal"
-            value={incomeInput}
-            onChange={(e) => setIncomeInput(Number(e.target.value) || 0)}
-            className="tabular w-full bg-transparent text-[28px] font-semibold leading-none focus:outline-none"
-          />
-          <span className="text-[12px] text-muted">/ mo</span>
-        </div>
-        <p className="mt-1 px-1 text-[12px] text-muted">
-          Each paycheck of {formatCurrency(incomeInput / 2, { showCents: false })}{" "}
-          gets auto-split.
-        </p>
-      </div>
-
-      <div className="mx-4 mt-4 rounded-2xl border border-border bg-surface p-4 shadow-card">
-        <SplitDonut
-          slices={[
-            { label: "Bills", value: pct.bills, color: COLORS.bills },
-            { label: "Spending", value: pct.spending, color: COLORS.spending },
-            { label: "Savings", value: pct.savings, color: COLORS.savings },
-          ]}
-          centerLabel="Allocation"
-          centerValue={`${total}%`}
-        />
-      </div>
-
-      <div className="space-y-5 px-4 py-5">
-        <Slider
-          label="Bills"
-          color={COLORS.bills}
-          value={pct.bills}
-          monthly={(incomeInput * pct.bills) / 100}
-          onChange={(v) => adjust("bills", v)}
-        />
-        <Slider
-          label="Spending"
-          color={COLORS.spending}
-          value={pct.spending}
-          monthly={(incomeInput * pct.spending) / 100}
-          onChange={(v) => adjust("spending", v)}
-          hint="The card you carry. Limit = this number."
-        />
-        <Slider
-          label="Savings"
-          color={COLORS.savings}
-          value={pct.savings}
-          monthly={(incomeInput * pct.savings) / 100}
-          onChange={(v) => adjust("savings", v)}
-        />
-      </div>
-
-      <div className="px-4 pb-8">
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={!valid}
-          className={cn(
-            "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-            !valid && "opacity-50",
-          )}
-        >
-          {valid ? "Save split" : `Total ${total}% — must be 100%`}
-        </button>
-      </div>
-    </>
-  );
-}
-
-function Slider({
-  label,
-  color,
-  value,
-  monthly,
-  onChange,
-  hint,
-}: {
-  label: string;
-  color: string;
-  value: number;
-  monthly: number;
-  onChange: (v: number) => void;
-  hint?: string;
-}) {
-  return (
-    <div>
-      <div className="mb-2 flex items-baseline justify-between">
-        <span className="flex items-center gap-2 text-[14px] font-medium">
-          <span
-            className="h-2.5 w-2.5 rounded-full"
-            style={{ background: color }}
-          />
-          {label}
-        </span>
-        <span className="tabular text-[14px] font-semibold">
-          {value}%
-          <span className="ml-2 text-[12px] font-normal text-muted">
-            {formatCurrency(monthly, { showCents: false })}/mo
-          </span>
-        </span>
-      </div>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-[var(--primary)]"
-        style={{ accentColor: color }}
+      <TopBar
+        back={{ href: "/settings", label: "Settings" }}
+        title="Income & split"
       />
-      {hint ? (
-        <p className="mt-1 text-[12px] text-muted">{hint}</p>
-      ) : null}
-    </div>
+      <SplitEditor
+        initialIncome={Number(profile?.monthly_income ?? 6000)}
+        initialBills={initialBills}
+        initialSpending={initialSpending}
+        initialSavings={initialSavings}
+        redirectTo="/settings"
+      />
+    </>
   );
 }

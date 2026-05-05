@@ -1,15 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
 import { SplitDonut } from "@/components/SplitDonut";
 import { TransactionRow } from "@/components/TransactionRow";
-import { Sparkline } from "@/components/Sparkline";
 import { UserAvatar } from "@/components/auth/UserAvatar";
-import { useBudgetStore } from "@/lib/store";
-import { useSupabaseUser } from "@/lib/useSupabaseUser";
+import { AddTransactionLauncher } from "@/components/transactions/AddTransactionLauncher";
+import { listAccounts } from "@/lib/db/accounts";
+import { listTransactions } from "@/lib/db/transactions";
+import { getCurrentProfile } from "@/lib/db/profile";
 import { formatCurrency, greeting } from "@/lib/format";
 
 const KIND_COLOR: Record<string, string> = {
@@ -18,39 +17,37 @@ const KIND_COLOR: Record<string, string> = {
   savings: "#C9A227",
 };
 
-export default function HomePage() {
-  const { income, accounts, transactions } = useBudgetStore();
-  const supabaseUser = useSupabaseUser();
-  const firstName = supabaseUser?.firstName ?? "there";
+export default async function HomePage() {
+  const [profile, accounts, recent] = await Promise.all([
+    getCurrentProfile(),
+    listAccounts(),
+    listTransactions({ limit: 5 }),
+  ]);
 
-  const total = accounts.reduce((sum, a) => sum + a.balance, 0);
-  const totalHistory = accounts[0].history.map((_, i) =>
-    accounts.reduce((sum, a) => sum + (a.history[i] ?? a.balance), 0),
-  );
+  const income = profile?.monthly_income ?? 0;
+  const firstName =
+    profile?.full_name?.split(" ")[0] ??
+    profile?.display_name?.split(" ")[0] ??
+    "there";
+
+  const total = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
 
   const slices = accounts
     .filter((a) => ["bills", "spending", "savings"].includes(a.kind))
     .map((a) => ({
       label: a.name,
-      value: a.allocation,
+      value: Number(a.allocation),
       color: KIND_COLOR[a.kind] ?? "#2F7D4F",
     }));
 
   const accountNameById = new Map(accounts.map((a) => [a.id, a.name]));
-  const recent = transactions.slice(0, 5);
 
   return (
     <>
       <TopBar
         right={
           <>
-            <Link
-              href="/transactions"
-              aria-label="Add transaction"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary-ink"
-            >
-              <Plus size={18} />
-            </Link>
+            <AddTransactionLauncher accounts={accounts} />
             <UserAvatar />
           </>
         }
@@ -59,17 +56,12 @@ export default function HomePage() {
         <div className="text-[13px] text-muted">
           {greeting()}, {firstName}.
         </div>
-        <div className="mt-1 flex items-end justify-between">
-          <div>
-            <div className="text-[12px] uppercase tracking-wide text-muted">
-              Total balance
-            </div>
-            <div className="tabular text-[40px] font-semibold leading-none">
-              {formatCurrency(total)}
-            </div>
+        <div className="mt-1">
+          <div className="text-[12px] uppercase tracking-wide text-muted">
+            Total balance
           </div>
-          <div className="text-primary">
-            <Sparkline data={totalHistory} width={120} height={36} fill="currentColor" />
+          <div className="tabular text-[40px] font-semibold leading-none">
+            {formatCurrency(total)}
           </div>
         </div>
       </section>
@@ -79,7 +71,7 @@ export default function HomePage() {
           <AccountCard
             key={account.id}
             account={account}
-            monthlyAllocation={income * account.allocation}
+            monthlyAllocation={income * Number(account.allocation)}
             href={`/transactions?account=${account.id}`}
           />
         ))}
@@ -119,16 +111,25 @@ export default function HomePage() {
             See all <ChevronRight size={14} />
           </Link>
         </div>
-        <div className="divide-y divide-border">
-          {recent.map((t) => (
-            <TransactionRow
-              key={t.id}
-              transaction={t}
-              showAccount={accountNameById.get(t.accountId)}
-              href={`/transactions/${t.id}`}
-            />
-          ))}
-        </div>
+        {recent.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
+            <p className="text-[14px] font-medium text-ink">No activity yet.</p>
+            <p className="mt-1 text-[12px] text-muted">
+              Add a transaction with the + button, or connect a bank later.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {recent.map((t) => (
+              <TransactionRow
+                key={t.id}
+                transaction={t}
+                showAccount={accountNameById.get(t.account_id)}
+                href={`/transactions/${t.id}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="h-8" />

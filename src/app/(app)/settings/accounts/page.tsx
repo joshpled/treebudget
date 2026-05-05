@@ -1,10 +1,8 @@
-"use client";
-
 import { CreditCard, Sprout, Receipt, TrendingUp, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
-import { useBudgetStore } from "@/lib/store";
+import { listAccounts } from "@/lib/db/accounts";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import type { AccountKind } from "@/lib/types";
 
@@ -16,8 +14,8 @@ const ICONS: Record<AccountKind, LucideIcon> = {
   other: Receipt,
 };
 
-export default function AccountsPage() {
-  const { accounts } = useBudgetStore();
+export default async function AccountsPage() {
+  const accounts = await listAccounts();
 
   return (
     <>
@@ -46,18 +44,18 @@ export default function AccountsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="text-[14px] font-medium text-ink">
                     {a.name}
-                    {a.isCard ? (
+                    {a.is_card ? (
                       <span className="ml-2 rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary-ink">
                         Card
                       </span>
                     ) : null}
                   </div>
                   <div className="text-[12px] text-muted capitalize">
-                    {a.kind} · {formatPercent(a.allocation)} of income
+                    {a.kind} · {formatPercent(Number(a.allocation))} of income
                   </div>
                 </div>
                 <div className="tabular text-[14px] font-semibold">
-                  {formatCurrency(a.balance, { showCents: false })}
+                  {formatCurrency(Number(a.balance), { showCents: false })}
                 </div>
               </div>
             );

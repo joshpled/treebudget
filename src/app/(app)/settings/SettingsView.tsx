@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   ChevronRight,
@@ -15,7 +13,7 @@ import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { useBudgetStore } from "@/lib/store";
+import type { Account } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
 type Item = {
@@ -30,11 +28,11 @@ type Item = {
 type Props = {
   displayName: string;
   email: string | null;
+  income: number;
+  accounts: Account[];
 };
 
-export function SettingsView({ displayName, email }: Props) {
-  const { income, accounts } = useBudgetStore();
-
+export function SettingsView({ displayName, email, income, accounts }: Props) {
   const bills = accounts.find((a) => a.kind === "bills");
   const spending = accounts.find((a) => a.kind === "spending");
   const savings = accounts.find((a) => a.kind === "savings");
@@ -45,7 +43,7 @@ export function SettingsView({ displayName, email }: Props) {
       icon: Banknote,
       label: "Income & split",
       hint: `${formatCurrency(income, { showCents: false })}/mo`,
-      trailing: `${formatPercent(bills?.allocation ?? 0)} · ${formatPercent(spending?.allocation ?? 0)} · ${formatPercent(savings?.allocation ?? 0)}`,
+      trailing: `${formatPercent(Number(bills?.allocation ?? 0))} · ${formatPercent(Number(spending?.allocation ?? 0))} · ${formatPercent(Number(savings?.allocation ?? 0))}`,
     },
     {
       href: "/settings/accounts",
@@ -94,7 +92,7 @@ export function SettingsView({ displayName, email }: Props) {
       </Section>
 
       <p className="px-4 pb-8 pt-2 text-center text-[12px] text-muted">
-        treebudget · v0.1 (mock data)
+        treebudget · v0.2
       </p>
     </>
   );

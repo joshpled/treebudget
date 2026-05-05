@@ -1,21 +1,27 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
-import { useBudgetStore } from "@/lib/store";
+import { getTransaction } from "@/lib/db/transactions";
+import { getAccount } from "@/lib/db/accounts";
 import { formatCurrency, formatMonthDay } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-export default function TransactionDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const { transactions, accounts } = useBudgetStore();
-  const txn = transactions.find((t) => t.id === id);
-  const account = txn ? accounts.find((a) => a.id === txn.accountId) : undefined;
+type Params = Promise<{ id: string }>;
+
+export default async function TransactionDetailPage({
+  params,
+}: {
+  params: Params;
+}) {
+  const { id } = await params;
+  const txn = await getTransaction(id);
+  const account = txn ? await getAccount(txn.account_id) : null;
 
   if (!txn) {
     return (
       <>
-        <TopBar back={{ href: "/transactions", label: "Activity" }} title="Transaction" />
+        <TopBar
+          back={{ href: "/transactions", label: "Activity" }}
+          title="Transaction"
+        />
         <div className="px-4 py-12 text-center text-sm text-muted">
           Transaction not found.
         </div>
@@ -23,11 +29,15 @@ export default function TransactionDetailPage() {
     );
   }
 
-  const positive = txn.amount > 0;
+  const amount = Number(txn.amount);
+  const positive = amount > 0;
 
   return (
     <>
-      <TopBar back={{ href: "/transactions", label: "Activity" }} title="Detail" />
+      <TopBar
+        back={{ href: "/transactions", label: "Activity" }}
+        title="Detail"
+      />
       <section className="px-4 pb-6 pt-6 text-center">
         <div className="text-[13px] uppercase tracking-wide text-muted">
           {txn.category}
@@ -38,38 +48,26 @@ export default function TransactionDetailPage() {
             positive ? "text-primary" : "text-ink",
           )}
         >
-          {formatCurrency(txn.amount, { signed: positive })}
+          {formatCurrency(amount, { signed: positive })}
         </div>
         <div className="mt-2 text-[15px] font-medium text-ink">
           {txn.merchant}
         </div>
         <div className="mt-1 text-[13px] text-muted">
-          {formatMonthDay(txn.date)} · {account?.name ?? "Account"}
+          {formatMonthDay(txn.posted_at)} · {account?.name ?? "Account"}
         </div>
       </section>
 
       <section className="mx-4 rounded-2xl border border-border bg-surface shadow-card">
         <Row label="Account" value={account?.name ?? "—"} />
         <Row label="Category" value={txn.category} />
-        <Row label="Date" value={new Date(txn.date).toLocaleString()} />
+        <Row label="Date" value={new Date(txn.posted_at).toLocaleString()} />
         {txn.note ? <Row label="Note" value={txn.note} /> : null}
+        {txn.external_source ? (
+          <Row label="Source" value={txn.external_source} />
+        ) : null}
       </section>
 
-      <section className="mx-4 mt-4 rounded-2xl border border-border bg-surface shadow-card">
-        <button
-          type="button"
-          className="block w-full px-4 py-3 text-left text-[14px] font-medium text-ink"
-        >
-          Recategorize
-        </button>
-        <div className="border-t border-border" />
-        <button
-          type="button"
-          className="block w-full px-4 py-3 text-left text-[14px] font-medium text-danger"
-        >
-          Hide from budget
-        </button>
-      </section>
       <div className="h-8" />
     </>
   );

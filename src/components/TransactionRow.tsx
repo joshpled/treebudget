@@ -16,11 +16,11 @@ import {
   Apple,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Transaction, TransactionCategory } from "@/lib/types";
+import type { Transaction } from "@/lib/types";
 import { formatCurrency, formatRelativeDay } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-const ICON_BY_CATEGORY: Record<TransactionCategory, LucideIcon> = {
+const ICON_BY_CATEGORY: Record<string, LucideIcon> = {
   Salary: Banknote,
   Rent: HomeIcon,
   Utilities: Lightbulb,
@@ -45,7 +45,8 @@ type Props = {
 
 export function TransactionRow({ transaction, showAccount, href }: Props) {
   const Icon = ICON_BY_CATEGORY[transaction.category] ?? Receipt;
-  const positive = transaction.amount > 0;
+  const amount = Number(transaction.amount);
+  const positive = amount > 0;
   const className = "flex items-center gap-3 px-1 py-3";
   const body = (
     <>
@@ -63,7 +64,7 @@ export function TransactionRow({ transaction, showAccount, href }: Props) {
               positive ? "text-primary" : "text-ink",
             )}
           >
-            {formatCurrency(transaction.amount, { signed: positive })}
+            {formatCurrency(amount, { signed: positive })}
           </span>
         </div>
         <div className="flex items-baseline justify-between gap-3 text-[12px] text-muted">
@@ -71,7 +72,7 @@ export function TransactionRow({ transaction, showAccount, href }: Props) {
             {transaction.category}
             {showAccount ? ` · ${showAccount}` : ""}
           </span>
-          <span className="shrink-0">{formatRelativeDay(transaction.date)}</span>
+          <span className="shrink-0">{formatRelativeDay(transaction.posted_at)}</span>
         </div>
       </div>
     </>

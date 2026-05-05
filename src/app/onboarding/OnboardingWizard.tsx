@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { TreeMark } from "@/components/TreeMark";
 import { SplitDonut } from "@/components/SplitDonut";
-import { useBudgetStore } from "@/lib/store";
+import { completeOnboarding } from "@/app/actions/budget";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
@@ -16,13 +15,14 @@ const COLORS = {
 
 type Step = 1 | 2 | 3;
 
-export default function OnboardingPage() {
-  const router = useRouter();
-  const { setIncome, setSplit } = useBudgetStore();
+type Props = { initialIncome: number };
 
+export function OnboardingWizard({ initialIncome }: Props) {
+  const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<Step>(1);
-  const [income, setIncomeLocal] = useState(6000);
+  const [income, setIncomeLocal] = useState(initialIncome || 6000);
   const [pct, setPct] = useState({ bills: 50, spending: 30, savings: 20 });
+  const [error, setError] = useState<string | null>(null);
 
   const total = pct.bills + pct.spending + pct.savings;
   const valid = total === 100;
@@ -44,13 +44,20 @@ export default function OnboardingPage() {
   };
 
   const finish = () => {
-    setIncome(income);
-    setSplit({
-      bills: pct.bills / 100,
-      spending: pct.spending / 100,
-      savings: pct.savings / 100,
+    setError(null);
+    startTransition(async () => {
+      try {
+        await completeOnboarding({
+          income,
+          bills: pct.bills,
+          spending: pct.spending,
+          savings: pct.savings,
+        });
+        // completeOnboarding redirects on success.
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't save.");
+      }
     });
-    router.push("/");
   };
 
   return (
@@ -180,9 +187,14 @@ export default function OnboardingPage() {
                 hint="Set aside automatically"
               />
             </div>
+            {error ? (
+              <div className="mt-4 rounded-2xl border border-danger/40 bg-danger/5 px-4 py-2.5 text-[13px] text-danger">
+                {error}
+              </div>
+            ) : null}
             <p className="mt-4 px-1 text-[12px] text-muted">
-              You can connect a real bank later. For now we&apos;ll fill the app
-              with sample activity so you can explore.
+              You can connect a real bank later. Add transactions manually with
+              the + button on Home anytime.
             </p>
           </>
         ) : null}
@@ -196,15 +208,21 @@ export default function OnboardingPage() {
             else if (step === 2 && valid) setStep(3);
             else if (step === 3) finish();
           }}
-          disabled={step === 2 && !valid}
+          disabled={(step === 2 && !valid) || isPending}
           className={cn(
             "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-            step === 2 && !valid && "opacity-50",
+            ((step === 2 && !valid) || isPending) && "opacity-60",
           )}
         >
-          {step === 1 ? "Continue" : step === 2 ? "Looks good" : "Take me in"}
+          {isPending
+            ? "Saving…"
+            : step === 1
+              ? "Continue"
+              : step === 2
+                ? "Looks good"
+                : "Take me in"}
         </button>
-        {step > 1 ? (
+        {step > 1 && !isPending ? (
           <button
             type="button"
             onClick={() => setStep((s) => (s === 3 ? 2 : 1) as Step)}

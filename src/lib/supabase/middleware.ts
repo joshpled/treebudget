@@ -7,11 +7,23 @@ const PUBLIC_PATHS = [
   "/sign-up",
   "/auth/callback",
   "/auth/sign-out",
-  "/auth/check-email",
+  "/check-email",
+];
+
+const ONBOARDING_EXEMPT = [
+  "/onboarding",
+  "/auth/callback",
+  "/auth/sign-out",
 ];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function isOnboardingExempt(pathname: string) {
+  return ONBOARDING_EXEMPT.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 }
 
 export async function updateSession(request: NextRequest) {
@@ -53,6 +65,21 @@ export async function updateSession(request: NextRequest) {
     redirectTo.pathname = "/";
     redirectTo.search = "";
     return NextResponse.redirect(redirectTo);
+  }
+
+  // First-time signed-in users land on onboarding until they finish.
+  if (user && !isPublicPath(pathname) && !isOnboardingExempt(pathname)) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarded_at")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile && !profile.onboarded_at) {
+      const redirectTo = request.nextUrl.clone();
+      redirectTo.pathname = "/onboarding";
+      redirectTo.search = "";
+      return NextResponse.redirect(redirectTo);
+    }
   }
 
   return response;
