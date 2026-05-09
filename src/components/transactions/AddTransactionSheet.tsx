@@ -90,11 +90,11 @@ export function AddTransactionSheet({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-t-3xl bg-bg shadow-card"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
+        style={{ maxHeight: "92dvh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-border bg-bg px-4 py-3">
           <span className="text-[15px] font-semibold">Add transaction</span>
           <button
             type="button"
@@ -106,7 +106,7 @@ export function AddTransactionSheet({
           </button>
         </div>
 
-        <div className="space-y-4 px-4 pb-5 pt-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-4 pb-4 pt-4">
           <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-1">
             <Toggle
               active={direction === "spend"}
@@ -194,7 +194,12 @@ export function AddTransactionSheet({
               {error}
             </div>
           ) : null}
+        </div>
 
+        <div
+          className="border-t border-border bg-bg px-4 pb-4 pt-3"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+        >
           <button
             type="button"
             onClick={submit}
