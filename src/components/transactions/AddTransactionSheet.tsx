@@ -91,7 +91,7 @@ export function AddTransactionSheet({
     >
       <div
         className="flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
-        style={{ maxHeight: "92dvh" }}
+        style={{ maxHeight: "85svh" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-border bg-bg px-4 py-3">
@@ -130,7 +130,6 @@ export function AddTransactionSheet({
               <span className="text-[24px] font-semibold text-muted">$</span>
               <input
                 inputMode="decimal"
-                autoFocus
                 value={amount}
                 onChange={(e) =>
                   setAmount(e.target.value.replace(/[^0-9.]/g, ""))
