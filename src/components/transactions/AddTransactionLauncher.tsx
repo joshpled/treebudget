@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus } from "lucide-react";
 import type { Account } from "@/lib/types";
 import { AddTransactionSheet } from "./AddTransactionSheet";
@@ -11,6 +12,12 @@ type Props = {
 
 export function AddTransactionLauncher({ accounts }: Props) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <>
       <button
@@ -21,12 +28,15 @@ export function AddTransactionLauncher({ accounts }: Props) {
       >
         <Plus size={18} />
       </button>
-      {open ? (
-        <AddTransactionSheet
-          accounts={accounts}
-          onClose={() => setOpen(false)}
-        />
-      ) : null}
+      {open && mounted
+        ? createPortal(
+            <AddTransactionSheet
+              accounts={accounts}
+              onClose={() => setOpen(false)}
+            />,
+            document.body,
+          )
+        : null}
     </>
   );
 }
