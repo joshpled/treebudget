@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, RefreshCw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { haptic } from "@/lib/haptic";
 
 type Props = {
   bankLinkId: string;
@@ -25,6 +26,7 @@ export function BankLinkRow({
 
   const sync = () => {
     setError(null);
+    haptic();
     startSync(async () => {
       try {
         const res = await fetch("/api/plaid/sync", { method: "POST" });
@@ -33,6 +35,7 @@ export function BankLinkRow({
           setError(body.error ?? "Sync failed");
           return;
         }
+        haptic(15);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Sync failed");

@@ -7,6 +7,7 @@ import type { Account } from "@/lib/types";
 import { TRANSACTION_CATEGORIES } from "@/lib/types";
 import { addTransaction } from "@/app/actions/budget";
 import { cn } from "@/lib/cn";
+import { haptic } from "@/lib/haptic";
 
 type Props = {
   accounts: Account[];
@@ -67,6 +68,7 @@ export function AddTransactionSheet({
       return;
     }
     const signed = direction === "spend" ? -Math.abs(parsed) : Math.abs(parsed);
+    haptic();
     startTransition(async () => {
       try {
         await addTransaction({
@@ -76,6 +78,7 @@ export function AddTransactionSheet({
           amount: signed,
           note: note.trim() || undefined,
         });
+        haptic(15);
         router.refresh();
         onClose();
       } catch (err) {
@@ -86,11 +89,11 @@ export function AddTransactionSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40"
+      className="animate-sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-ink/40"
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
+        className="animate-sheet-content flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
         style={{ maxHeight: "85svh" }}
         onClick={(e) => e.stopPropagation()}
       >
