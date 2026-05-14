@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus } from "lucide-react";
 import type { Account } from "@/lib/types";
+import { haptic } from "@/lib/haptic";
 import { AddTransactionSheet } from "./AddTransactionSheet";
 
 type Props = {
@@ -23,7 +24,10 @@ export function AddTransactionLauncher({ accounts }: Props) {
       <button
         type="button"
         aria-label="Add transaction"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          haptic();
+          setOpen(true);
+        }}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary-ink"
       >
         <Plus size={18} />

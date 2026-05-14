@@ -133,11 +133,11 @@ export function AccountMappingSheet({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40"
+      className="animate-sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-ink/40"
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
+        className="animate-sheet-content flex w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-card"
         style={{ maxHeight: "85svh" }}
         onClick={(e) => e.stopPropagation()}
       >
