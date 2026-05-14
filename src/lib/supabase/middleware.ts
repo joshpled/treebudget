@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   "/auth/callback",
   "/auth/sign-out",
   "/check-email",
+  "/api/plaid/webhook",
 ];
 
 const ONBOARDING_EXEMPT = [

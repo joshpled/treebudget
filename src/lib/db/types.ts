@@ -25,6 +25,8 @@ export type Account = {
   is_card: boolean;
   archived: boolean;
   position: number;
+  plaid_account_id: string | null;
+  bank_link_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -50,6 +52,21 @@ export type Goal = {
   target_amount: number;
   current_amount: number;
   due_date: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BankLink = {
+  id: string;
+  user_id: string;
+  provider: string;
+  plaid_item_id: string;
+  access_token_encrypted: string;
+  cursor: string | null;
+  institution_id: string | null;
+  institution_name: string | null;
+  status: "active" | "login_required" | "revoked";
+  last_synced_at: string | null;
   created_at: string;
   updated_at: string;
 };

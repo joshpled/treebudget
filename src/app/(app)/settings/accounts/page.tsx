@@ -2,7 +2,10 @@ import { CreditCard, Sprout, Receipt, TrendingUp, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
+import { PlaidLinkButton } from "@/components/plaid/PlaidLinkButton";
+import { BankLinkRow } from "@/components/plaid/BankLinkRow";
 import { listAccounts } from "@/lib/db/accounts";
+import { listBankLinks } from "@/lib/db/bank_links";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import type { AccountKind } from "@/lib/types";
 
@@ -15,7 +18,10 @@ const ICONS: Record<AccountKind, LucideIcon> = {
 };
 
 export default async function AccountsPage() {
-  const accounts = await listAccounts();
+  const [accounts, links] = await Promise.all([
+    listAccounts(),
+    listBankLinks(),
+  ]);
 
   return (
     <>
@@ -23,7 +29,7 @@ export default async function AccountsPage() {
       <PageHeader
         eyebrow="Setup"
         title="Your accounts"
-        subtitle="The 3 core accounts power the auto-split. You can add more anytime."
+        subtitle="The 3 core accounts power the auto-split. Connect a bank to sync transactions."
       />
 
       <section className="px-4 pb-4">
@@ -33,6 +39,7 @@ export default async function AccountsPage() {
         <div className="space-y-2">
           {accounts.map((a) => {
             const Icon = ICONS[a.kind];
+            const linked = a.plaid_account_id !== null;
             return (
               <div
                 key={a.id}
@@ -49,6 +56,11 @@ export default async function AccountsPage() {
                         Card
                       </span>
                     ) : null}
+                    {linked ? (
+                      <span className="ml-2 rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary-ink">
+                        Linked
+                      </span>
+                    ) : null}
                   </div>
                   <div className="text-[12px] text-muted capitalize">
                     {a.kind} · {formatPercent(Number(a.allocation))} of income
@@ -60,6 +72,26 @@ export default async function AccountsPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="px-4 pb-4">
+        <h2 className="px-1 pb-2 text-[12px] font-medium uppercase tracking-wide text-muted">
+          Bank sync
+        </h2>
+        <div className="space-y-2">
+          {links.map((link) => (
+            <BankLinkRow
+              key={link.id}
+              bankLinkId={link.id}
+              institutionName={link.institution_name}
+              status={link.status}
+              lastSyncedAt={link.last_synced_at}
+            />
+          ))}
+          <PlaidLinkButton
+            label={links.length === 0 ? "Connect a bank" : "Connect another bank"}
+          />
         </div>
       </section>
 
