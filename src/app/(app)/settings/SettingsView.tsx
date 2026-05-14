@@ -52,10 +52,10 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
       hint: `${accounts.length} accounts`,
     },
     {
+      href: "/settings/accounts",
       icon: Link2,
       label: "Connect a bank",
       hint: "Powered by Plaid",
-      disabled: true,
     },
   ];
 

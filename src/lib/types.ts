@@ -1,6 +1,7 @@
 export type {
   Account,
   AccountKind,
+  BankLink,
   Goal,
   Profile,
   Transaction,
