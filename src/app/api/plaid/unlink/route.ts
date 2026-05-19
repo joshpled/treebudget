@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPlaidClient } from "@/lib/plaid";
 import { decryptToken } from "@/lib/crypto";
+import { safePlaidError } from "@/lib/plaid/errors";
 
 const schema = z.object({ bank_link_id: z.string().uuid() });
 
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     await plaid.itemRemove({ access_token: decryptToken(link.access_token_encrypted) });
   } catch (err) {
     // Continue with local cleanup even if Plaid call fails.
-    console.error("plaid item remove failed (continuing)", err);
+    console.error("plaid item remove failed (continuing):", safePlaidError(err));
   }
 
   // Unlink accounts (don't delete; the user's budget buckets remain).

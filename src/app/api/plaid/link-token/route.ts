@@ -7,6 +7,7 @@ import {
   PLAID_COUNTRY_CODES,
   PLAID_PRODUCTS,
 } from "@/lib/plaid";
+import { safePlaidError } from "@/lib/plaid/errors";
 
 export async function POST(_req: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -29,7 +30,7 @@ export async function POST(_req: NextRequest) {
     });
     return NextResponse.json({ link_token: res.data.link_token });
   } catch (err) {
-    console.error("plaid link-token error", err);
+    console.error("plaid link-token error:", safePlaidError(err));
     return NextResponse.json(
       { error: "Could not create link token" },
       { status: 500 },
