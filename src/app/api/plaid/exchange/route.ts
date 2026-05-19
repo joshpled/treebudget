@@ -7,6 +7,7 @@ import {
   refreshAccountsForLink,
   syncTransactionsForLink,
 } from "@/lib/plaid/sync";
+import { safePlaidError } from "@/lib/plaid/errors";
 
 const schema = z.object({
   public_token: z.string().min(1),
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       accounts,
     });
   } catch (err) {
-    console.error("plaid exchange error", err);
+    console.error("plaid exchange error:", safePlaidError(err));
     return NextResponse.json(
       { error: "Could not link bank account" },
       { status: 500 },
@@ -129,6 +130,18 @@ export async function PUT(req: NextRequest) {
     );
   }
 
+  // Confirm the bank link belongs to this user BEFORE mutating any account
+  // rows — don't let a caller point their accounts at someone else's link.
+  const { data: link } = await supabase
+    .from("bank_links")
+    .select("id, plaid_item_id, access_token_encrypted, cursor")
+    .eq("id", body.bank_link_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!link) {
+    return NextResponse.json({ error: "Bank link not found" }, { status: 404 });
+  }
+
   // Apply the mappings: set plaid_account_id + bank_link_id on each
   // treebudget account row by kind.
   for (const m of body.mappings) {
@@ -142,23 +155,12 @@ export async function PUT(req: NextRequest) {
       .eq("user_id", user.id)
       .eq("kind", m.kind);
     if (error) {
-      console.error("mapping update error", error);
+      console.error("mapping update error:", error.message);
       return NextResponse.json(
         { error: "Could not save mapping" },
         { status: 500 },
       );
     }
-  }
-
-  // Now that accounts are linked, fetch the access token + sync transactions.
-  const { data: link } = await supabase
-    .from("bank_links")
-    .select("id, plaid_item_id, access_token_encrypted, cursor")
-    .eq("id", body.bank_link_id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (!link) {
-    return NextResponse.json({ error: "Bank link not found" }, { status: 404 });
   }
 
   try {
@@ -171,7 +173,7 @@ export async function PUT(req: NextRequest) {
     const result = await syncTransactionsForLink(supabase, user.id, link);
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
-    console.error("post-mapping sync error", err);
+    console.error("post-mapping sync error:", safePlaidError(err));
     return NextResponse.json({ ok: true, synced: false }, { status: 200 });
   }
 }

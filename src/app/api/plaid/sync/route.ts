@@ -4,6 +4,7 @@ import {
   refreshAccountsForLink,
   syncTransactionsForLink,
 } from "@/lib/plaid/sync";
+import { safePlaidError } from "@/lib/plaid/errors";
 
 export async function POST(_req: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -40,7 +41,7 @@ export async function POST(_req: NextRequest) {
       totalAdded += result.added;
       totalRemoved += result.removed;
     } catch (err) {
-      console.error("plaid sync error for link", link.id, err);
+      console.error("plaid sync error for link", link.id, safePlaidError(err));
     }
   }
 
