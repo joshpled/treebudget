@@ -8,6 +8,7 @@ import { TRANSACTION_CATEGORIES } from "@/lib/types";
 import { addTransaction } from "@/app/actions/budget";
 import { cn } from "@/lib/cn";
 import { haptic } from "@/lib/haptic";
+import { Spinner } from "@/components/Spinner";
 
 type Props = {
   accounts: Account[];
@@ -207,10 +208,11 @@ export function AddTransactionSheet({
             onClick={submit}
             disabled={isPending}
             className={cn(
-              "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-              isPending && "opacity-60",
+              "flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
+              isPending && "opacity-70",
             )}
           >
+            {isPending ? <Spinner /> : null}
             {isPending ? "Saving…" : "Save"}
           </button>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { SplitDonut } from "@/components/SplitDonut";
+import { Spinner } from "@/components/Spinner";
 import { saveIncomeAndSplit } from "@/app/actions/budget";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -151,10 +152,11 @@ export function SplitEditor({
           onClick={onSave}
           disabled={!valid || isPending}
           className={cn(
-            "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-            (!valid || isPending) && "opacity-60",
+            "flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
+            (!valid || isPending) && "opacity-70",
           )}
         >
+          {isPending ? <Spinner /> : null}
           {isPending
             ? "Saving…"
             : valid
