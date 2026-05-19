@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/format";
+import { Spinner } from "@/components/Spinner";
 
 type PlaidAccount = {
   plaid_account_id: string;
@@ -220,10 +221,11 @@ export function AccountMappingSheet({
             onClick={onSave}
             disabled={isPending}
             className={cn(
-              "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-              isPending && "opacity-60",
+              "flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
+              isPending && "opacity-70",
             )}
           >
+            {isPending ? <Spinner /> : null}
             {isPending ? "Linking…" : "Link & sync"}
           </button>
         </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field } from "@/components/auth/Field";
+import { Spinner } from "@/components/Spinner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/cn";
 
@@ -69,10 +70,11 @@ export function SignInForm({ next }: Props) {
         type="submit"
         disabled={loading}
         className={cn(
-          "w-full rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-          loading && "opacity-60",
+          "flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
+          loading && "opacity-70",
         )}
       >
+        {loading ? <Spinner /> : null}
         {loading ? "Signing in…" : "Sign in"}
       </button>
       <div className="text-center text-[12px]">
