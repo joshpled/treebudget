@@ -56,6 +56,19 @@ export async function refreshAccountsForLink(
  * upsert into our transactions table (deduped by external_id), and update
  * the cursor on the bank link.
  */
+export type SyncResult = {
+  /** Total transactions Plaid returned across all pages. */
+  fetched: number;
+  /** Transactions skipped because their Plaid account isn't mapped. */
+  skippedUnmapped: number;
+  /** Rows inserted into our transactions table. */
+  added: number;
+  modified: number;
+  removed: number;
+  /** Plaid account ids seen in the data (for diagnostics). */
+  plaidAccountIds: string[];
+};
+
 export async function syncTransactionsForLink(
   supabase: SupabaseClient,
   userId: string,
@@ -65,14 +78,17 @@ export async function syncTransactionsForLink(
     access_token_encrypted: string;
     cursor: string | null;
   },
-): Promise<{ added: number; modified: number; removed: number }> {
+): Promise<SyncResult> {
   const accessToken = decryptToken(bankLink.access_token_encrypted);
   const plaid = getPlaidClient();
 
   let cursor = bankLink.cursor ?? undefined;
+  let fetched = 0;
+  let skippedUnmapped = 0;
   let added = 0;
   let modified = 0;
   let removed = 0;
+  const seenAccountIds = new Set<string>();
   let hasMore = true;
   // Plaid /transactions/sync can return multiple pages — loop until done.
   while (hasMore) {
@@ -81,6 +97,8 @@ export async function syncTransactionsForLink(
       cursor,
       options: { include_personal_finance_category: true },
     });
+
+    for (const t of res.data.added) seenAccountIds.add(t.account_id);
 
     // Map plaid account_id -> our treebudget account_id (for users who
     // mapped their bank accounts to budget buckets).
@@ -108,10 +126,14 @@ export async function syncTransactionsForLink(
     }
 
     if (res.data.added.length > 0) {
+      fetched += res.data.added.length;
       const rows = res.data.added
         .map((t) => {
           const account_id = accountMap.get(t.account_id);
-          if (!account_id) return null; // skip txns for unlinked accounts
+          if (!account_id) {
+            skippedUnmapped += 1;
+            return null; // skip txns for unlinked accounts
+          }
           // Plaid amount: positive = money OUT. Negate for our convention
           // (positive = inbound, negative = spend).
           const amount = -Number(t.amount);
@@ -174,5 +196,12 @@ export async function syncTransactionsForLink(
     .update({ cursor, last_synced_at: new Date().toISOString() })
     .eq("id", bankLink.id);
 
-  return { added, modified, removed };
+  return {
+    fetched,
+    skippedUnmapped,
+    added,
+    modified,
+    removed,
+    plaidAccountIds: Array.from(seenAccountIds),
+  };
 }

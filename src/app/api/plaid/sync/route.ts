@@ -27,6 +27,8 @@ export async function POST(_req: NextRequest) {
     return NextResponse.json({ ok: true, synced: 0, links: 0 });
   }
 
+  let totalFetched = 0;
+  let totalSkipped = 0;
   let totalAdded = 0;
   let totalRemoved = 0;
   const failures: string[] = [];
@@ -39,6 +41,8 @@ export async function POST(_req: NextRequest) {
         link.access_token_encrypted,
       );
       const result = await syncTransactionsForLink(supabase, user.id, link);
+      totalFetched += result.fetched;
+      totalSkipped += result.skippedUnmapped;
       totalAdded += result.added;
       totalRemoved += result.removed;
     } catch (err) {
@@ -60,6 +64,8 @@ export async function POST(_req: NextRequest) {
   return NextResponse.json({
     ok: true,
     links: links.length,
+    fetched: totalFetched,
+    skippedUnmapped: totalSkipped,
     added: totalAdded,
     removed: totalRemoved,
     partialError: failures[0],
