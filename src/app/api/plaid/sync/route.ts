@@ -29,6 +29,7 @@ export async function POST(_req: NextRequest) {
 
   let totalAdded = 0;
   let totalRemoved = 0;
+  const failures: string[] = [];
   for (const link of links) {
     try {
       await refreshAccountsForLink(
@@ -41,8 +42,19 @@ export async function POST(_req: NextRequest) {
       totalAdded += result.added;
       totalRemoved += result.removed;
     } catch (err) {
-      console.error("plaid sync error for link", link.id, safePlaidError(err));
+      const message = safePlaidError(err);
+      console.error("plaid sync error for link", link.id, message);
+      failures.push(message);
     }
+  }
+
+  // Surface failures to the client instead of silently reporting success —
+  // a silent failure here is how a broken sync goes unnoticed.
+  if (failures.length > 0 && totalAdded === 0) {
+    return NextResponse.json(
+      { ok: false, error: `Sync failed: ${failures[0]}` },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
@@ -50,5 +62,6 @@ export async function POST(_req: NextRequest) {
     links: links.length,
     added: totalAdded,
     removed: totalRemoved,
+    partialError: failures[0],
   });
 }
