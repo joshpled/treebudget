@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getPlaidClient } from "@/lib/plaid";
+import { decryptToken } from "@/lib/crypto";
+import { safePlaidError } from "@/lib/plaid/errors";
 
 const splitSchema = z
   .object({
@@ -117,4 +120,72 @@ export async function addTransaction(input: AddTransactionInput) {
   if (updErr) throw updErr;
 
   revalidatePath("/", "layout");
+}
+
+const DEFAULT_ALLOCATION: Record<"bills" | "spending" | "savings", number> = {
+  bills: 0.5,
+  spending: 0.3,
+  savings: 0.2,
+};
+
+/**
+ * Wipe the signed-in user's data back to a fresh state: removes Plaid items,
+ * deletes all transactions / goals / bank links, zeroes the three core
+ * accounts and unlinks them, and restarts onboarding. The auth user and
+ * login session are kept. Every operation is scoped to the user's own rows.
+ */
+export async function resetAccount() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+
+  // Best-effort: tell Plaid to release each linked item so we stop being
+  // billed / counted for it. Local cleanup proceeds regardless.
+  const { data: links } = await supabase
+    .from("bank_links")
+    .select("access_token_encrypted")
+    .eq("user_id", user.id);
+  for (const link of links ?? []) {
+    try {
+      const plaid = getPlaidClient();
+      await plaid.itemRemove({
+        access_token: decryptToken(link.access_token_encrypted),
+      });
+    } catch (err) {
+      console.error("resetAccount itemRemove failed:", safePlaidError(err));
+    }
+  }
+
+  // Delete owned rows. RLS also scopes these, but the explicit filter keeps
+  // intent obvious.
+  await supabase.from("transactions").delete().eq("user_id", user.id);
+  await supabase.from("goals").delete().eq("user_id", user.id);
+  await supabase.from("bank_links").delete().eq("user_id", user.id);
+
+  // Reset the three core accounts: zero balance, unlinked, default split.
+  for (const kind of ["bills", "spending", "savings"] as const) {
+    const { error } = await supabase
+      .from("accounts")
+      .update({
+        balance: 0,
+        plaid_account_id: null,
+        bank_link_id: null,
+        allocation: DEFAULT_ALLOCATION[kind],
+      })
+      .eq("user_id", user.id)
+      .eq("kind", kind);
+    if (error) throw error;
+  }
+
+  // Restart onboarding.
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({ monthly_income: 6000, onboarded_at: null })
+    .eq("id", user.id);
+  if (profileError) throw profileError;
+
+  revalidatePath("/", "layout");
+  redirect("/onboarding");
 }
