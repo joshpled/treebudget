@@ -13,6 +13,7 @@ import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { ResetAccountButton } from "@/components/ResetAccountButton";
 import type { Account } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
@@ -89,6 +90,7 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
 
       <Section title="Account">
         <SignOutButton />
+        <ResetAccountButton />
       </Section>
 
       <p className="px-4 pb-8 pt-2 text-center text-[12px] text-muted">
