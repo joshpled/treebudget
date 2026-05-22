@@ -4,6 +4,7 @@ import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaidLinkButton } from "@/components/plaid/PlaidLinkButton";
 import { BankLinkRow } from "@/components/plaid/BankLinkRow";
+import { FireTestWebhookButton } from "@/components/plaid/FireTestWebhookButton";
 import { listAccounts } from "@/lib/db/accounts";
 import { listBankLinks } from "@/lib/db/bank_links";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -22,6 +23,7 @@ export default async function AccountsPage() {
     listAccounts(),
     listBankLinks(),
   ]);
+  const isSandbox = (process.env.PLAID_ENV ?? "sandbox") === "sandbox";
 
   return (
     <>
@@ -92,6 +94,7 @@ export default async function AccountsPage() {
           <PlaidLinkButton
             label={links.length === 0 ? "Connect a bank" : "Connect another bank"}
           />
+          {isSandbox && links.length > 0 ? <FireTestWebhookButton /> : null}
         </div>
       </section>
 
