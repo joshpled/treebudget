@@ -56,11 +56,25 @@ export function BankLinkRow({
         }
         haptic(15);
         const added = Number(body.added ?? 0);
-        setNotice(
-          added > 0
-            ? `Imported ${added} transaction${added === 1 ? "" : "s"}.`
-            : "Up to date — no new transactions.",
-        );
+        const fetched = Number(body.fetched ?? 0);
+        const skipped = Number(body.skippedUnmapped ?? 0);
+        // Self-diagnosing message: distinguish "Plaid sent nothing" from
+        // "sent data but nothing matched a mapped account" from success.
+        if (added > 0) {
+          setNotice(
+            `Imported ${added} transaction${added === 1 ? "" : "s"}.`,
+          );
+        } else if (fetched === 0) {
+          setNotice(
+            "Plaid returned 0 transactions. If you just connected, wait ~30s and sync again.",
+          );
+        } else if (skipped > 0) {
+          setNotice(
+            `Plaid sent ${fetched} transaction${fetched === 1 ? "" : "s"}, but none were on a mapped account. Use "Change accounts" to map your Checking/Savings.`,
+          );
+        } else {
+          setNotice("Up to date — no new transactions.");
+        }
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Sync failed");
