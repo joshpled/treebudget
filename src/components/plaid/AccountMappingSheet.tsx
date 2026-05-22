@@ -23,6 +23,8 @@ type Props = {
   bankLinkId: string;
   institutionName: string | null;
   plaidAccounts: PlaidAccount[];
+  /** Existing plaid_account_id -> kind, when re-mapping a connected bank. */
+  initialAssignments?: Record<string, string>;
   onClose: () => void;
 };
 
@@ -37,10 +39,20 @@ function autoSuggest(a: PlaidAccount): Kind {
   return "skip";
 }
 
+function isKind(value: string): value is Kind {
+  return (
+    value === "bills" ||
+    value === "spending" ||
+    value === "savings" ||
+    value === "skip"
+  );
+}
+
 export function AccountMappingSheet({
   bankLinkId,
   institutionName,
   plaidAccounts,
+  initialAssignments,
   onClose,
 }: Props) {
   const router = useRouter();
@@ -52,7 +64,10 @@ export function AccountMappingSheet({
     const out: Record<string, Kind> = {};
     const usedKinds = new Set<Kind>();
     for (const a of plaidAccounts) {
-      let suggestion = autoSuggest(a);
+      // Prefer an existing mapping (re-map flow); fall back to auto-suggest.
+      const existing = initialAssignments?.[a.plaid_account_id];
+      let suggestion: Kind =
+        existing && isKind(existing) ? existing : autoSuggest(a);
       if (suggestion !== "skip" && usedKinds.has(suggestion)) {
         suggestion = "skip";
       }

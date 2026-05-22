@@ -141,6 +141,15 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Bank link not found" }, { status: 404 });
   }
 
+  // Clear any existing mappings for this bank link first, so re-mapping
+  // (changing which account funds which bucket) starts from a clean slate
+  // and a bucket that's been unmapped doesn't keep a stale link.
+  await supabase
+    .from("accounts")
+    .update({ plaid_account_id: null, bank_link_id: null })
+    .eq("user_id", user.id)
+    .eq("bank_link_id", body.bank_link_id);
+
   // Apply the mappings: link plaid_account_id + bank_link_id onto each
   // treebudget bucket by kind. The bucket name (Bills/Spending/Savings) is
   // intentionally left alone — the "Linked" badge shows the connection.
