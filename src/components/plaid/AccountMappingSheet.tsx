@@ -99,10 +99,10 @@ export function AccountMappingSheet({
       .map((a) => ({
         plaid_account_id: a.plaid_account_id,
         kind: assignments[a.plaid_account_id],
-        name: a.official_name ?? a.name,
       }))
-      .filter((m): m is { plaid_account_id: string; kind: "bills" | "spending" | "savings"; name: string } =>
-        m.kind !== "skip",
+      .filter(
+        (m): m is { plaid_account_id: string; kind: "bills" | "spending" | "savings" } =>
+          m.kind !== "skip",
       );
 
     if (mappings.length === 0) {

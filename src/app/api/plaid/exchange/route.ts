@@ -106,7 +106,6 @@ const mappingSchema = z.object({
     z.object({
       plaid_account_id: z.string(),
       kind: z.enum(["bills", "spending", "savings"]),
-      name: z.string().optional(),
     }),
   ),
 });
@@ -142,15 +141,15 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Bank link not found" }, { status: 404 });
   }
 
-  // Apply the mappings: set plaid_account_id + bank_link_id on each
-  // treebudget account row by kind.
+  // Apply the mappings: link plaid_account_id + bank_link_id onto each
+  // treebudget bucket by kind. The bucket name (Bills/Spending/Savings) is
+  // intentionally left alone — the "Linked" badge shows the connection.
   for (const m of body.mappings) {
     const { error } = await supabase
       .from("accounts")
       .update({
         plaid_account_id: m.plaid_account_id,
         bank_link_id: body.bank_link_id,
-        name: m.name ?? undefined,
       })
       .eq("user_id", user.id)
       .eq("kind", m.kind);

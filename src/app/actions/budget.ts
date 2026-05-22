@@ -122,10 +122,13 @@ export async function addTransaction(input: AddTransactionInput) {
   revalidatePath("/", "layout");
 }
 
-const DEFAULT_ALLOCATION: Record<"bills" | "spending" | "savings", number> = {
-  bills: 0.5,
-  spending: 0.3,
-  savings: 0.2,
+const DEFAULT_ACCOUNTS: Record<
+  "bills" | "spending" | "savings",
+  { name: string; allocation: number }
+> = {
+  bills: { name: "Bills", allocation: 0.5 },
+  spending: { name: "Spending", allocation: 0.3 },
+  savings: { name: "Savings", allocation: 0.2 },
 };
 
 /**
@@ -164,15 +167,17 @@ export async function resetAccount() {
   await supabase.from("goals").delete().eq("user_id", user.id);
   await supabase.from("bank_links").delete().eq("user_id", user.id);
 
-  // Reset the three core accounts: zero balance, unlinked, default split.
+  // Reset the three core accounts: default name, zero balance, unlinked,
+  // default split.
   for (const kind of ["bills", "spending", "savings"] as const) {
     const { error } = await supabase
       .from("accounts")
       .update({
+        name: DEFAULT_ACCOUNTS[kind].name,
         balance: 0,
         plaid_account_id: null,
         bank_link_id: null,
-        allocation: DEFAULT_ALLOCATION[kind],
+        allocation: DEFAULT_ACCOUNTS[kind].allocation,
       })
       .eq("user_id", user.id)
       .eq("kind", kind);
