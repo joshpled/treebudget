@@ -34,7 +34,9 @@ export function SplitEditor({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [income, setIncome] = useState(initialIncome);
+  // Store the raw text so the field can be cleared and retyped freely.
+  const [incomeText, setIncomeText] = useState(String(initialIncome));
+  const income = Number(incomeText) || 0;
   const [pct, setPct] = useState({
     bills: initialBills,
     spending: initialSpending,
@@ -89,10 +91,13 @@ export function SplitEditor({
         <div className="mt-2 flex items-baseline gap-2 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card focus-within:border-primary">
           <span className="text-[24px] font-semibold text-muted">$</span>
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
-            value={income}
-            onChange={(e) => setIncome(Number(e.target.value) || 0)}
+            value={incomeText}
+            onChange={(e) =>
+              setIncomeText(e.target.value.replace(/[^0-9.]/g, ""))
+            }
+            placeholder="0"
             className="tabular w-full bg-transparent text-[28px] font-semibold leading-none focus:outline-none"
           />
           <span className="text-[12px] text-muted">/ mo</span>
@@ -150,18 +155,20 @@ export function SplitEditor({
         <button
           type="button"
           onClick={onSave}
-          disabled={!valid || isPending}
+          disabled={!valid || isPending || income <= 0}
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-opacity",
-            (!valid || isPending) && "opacity-70",
+            (!valid || isPending || income <= 0) && "opacity-70",
           )}
         >
           {isPending ? <Spinner /> : null}
           {isPending
             ? "Saving…"
-            : valid
-              ? "Save split"
-              : `Total ${total}% — must be 100%`}
+            : income <= 0
+              ? "Enter your income"
+              : valid
+                ? "Save split"
+                : `Total ${total}% — must be 100%`}
         </button>
       </div>
     </>
