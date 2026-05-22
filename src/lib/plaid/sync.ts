@@ -82,7 +82,33 @@ export async function syncTransactionsForLink(
   const accessToken = decryptToken(bankLink.access_token_encrypted);
   const plaid = getPlaidClient();
 
-  let cursor = bankLink.cursor ?? undefined;
+  // Decide the starting cursor. A stored cursor is only trustworthy if this
+  // link has actually imported transactions before. The very first sync runs
+  // moments after the Plaid item is created — before Plaid finishes its
+  // initial extraction — and returns an empty page plus a cursor. Resuming
+  // forever from that pre-extraction cursor strands the initial batch. So if
+  // we have a cursor but no imported transactions yet, sync from scratch.
+  let startCursor = bankLink.cursor ?? undefined;
+  if (startCursor) {
+    const { data: linkAccounts } = await supabase
+      .from("accounts")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("bank_link_id", bankLink.id);
+    const accountIds = (linkAccounts ?? []).map((a) => a.id as string);
+    let hasExistingTxns = false;
+    if (accountIds.length > 0) {
+      const { count } = await supabase
+        .from("transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("external_source", "plaid")
+        .in("account_id", accountIds);
+      hasExistingTxns = (count ?? 0) > 0;
+    }
+    if (!hasExistingTxns) startCursor = undefined;
+  }
+
+  let cursor = startCursor;
   let fetched = 0;
   let skippedUnmapped = 0;
   let added = 0;
@@ -191,10 +217,15 @@ export async function syncTransactionsForLink(
     hasMore = res.data.has_more;
   }
 
-  await supabase
-    .from("bank_links")
-    .update({ cursor, last_synced_at: new Date().toISOString() })
-    .eq("id", bankLink.id);
+  // Persist the cursor only when this sync actually saw data. A link that
+  // synced while Plaid was still extracting must not lock in that empty
+  // cursor — leaving it null lets the next sync re-pull from the beginning.
+  const sawData = fetched > 0 || modified > 0 || removed > 0;
+  const update: { last_synced_at: string; cursor?: string } = {
+    last_synced_at: new Date().toISOString(),
+  };
+  if (sawData) update.cursor = cursor;
+  await supabase.from("bank_links").update(update).eq("id", bankLink.id);
 
   return {
     fetched,
