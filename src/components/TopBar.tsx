@@ -7,10 +7,15 @@ type Props = {
   right?: React.ReactNode;
 };
 
+/**
+ * Top header. Mobile shows the logo + page title; desktop hides the logo
+ * (the sidebar carries the brand) and widens the inner container to match
+ * the page content max-width.
+ */
 export function TopBar({ title, back, right }: Props) {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/85 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4 lg:max-w-6xl lg:px-8">
         <div className="flex items-center gap-2">
           {back ? (
             <Link
@@ -21,7 +26,7 @@ export function TopBar({ title, back, right }: Props) {
               <span>{back.label ?? "Back"}</span>
             </Link>
           ) : (
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 lg:hidden">
               <TreeMark size={22} />
               <span className="text-[15px] font-semibold tracking-tight">
                 treebudget
@@ -30,7 +35,7 @@ export function TopBar({ title, back, right }: Props) {
           )}
         </div>
         {title && !back ? (
-          <span className="absolute left-1/2 -translate-x-1/2 text-sm font-medium">
+          <span className="absolute left-1/2 -translate-x-1/2 text-sm font-medium lg:static lg:translate-x-0 lg:text-[15px]">
             {title}
           </span>
         ) : null}

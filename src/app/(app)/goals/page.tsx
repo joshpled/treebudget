@@ -11,12 +11,13 @@ export default async function GoalsPage() {
   return (
     <>
       <TopBar right={<UserAvatar />} />
-      <PageHeader
-        eyebrow="Savings"
-        title="Goals"
-        subtitle="Set targets. Watch them grow."
-      />
-      <div className="space-y-3 px-4 pb-6">
+      <div className="mx-auto w-full max-w-md lg:max-w-5xl lg:px-8">
+        <PageHeader
+          eyebrow="Savings"
+          title="Goals"
+          subtitle="Set targets. Watch them grow."
+        />
+        <div className="grid gap-3 px-4 pb-6 lg:grid-cols-2 lg:px-0">
         {goals.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
             <p className="text-[14px] font-medium text-ink">No goals yet.</p>
@@ -78,6 +79,7 @@ export default async function GoalsPage() {
         >
           + Add a savings goal
         </button>
+        </div>
       </div>
     </>
   );

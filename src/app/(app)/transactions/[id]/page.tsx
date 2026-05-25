@@ -38,6 +38,7 @@ export default async function TransactionDetailPage({
         back={{ href: "/transactions", label: "Activity" }}
         title="Detail"
       />
+      <div className="mx-auto w-full max-w-md lg:max-w-2xl lg:px-8">
       <section className="px-4 pb-6 pt-6 text-center">
         <div className="text-[13px] uppercase tracking-wide text-muted">
           {txn.category}
@@ -69,6 +70,7 @@ export default async function TransactionDetailPage({
       </section>
 
       <div className="h-8" />
+      </div>
     </>
   );
 }

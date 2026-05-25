@@ -36,46 +36,50 @@ export default async function TransactionsPage({
           </>
         }
       />
-      <PageHeader
-        eyebrow="Activity"
-        title="All transactions"
-        subtitle={`${txns.length} total`}
-      />
-      <TransactionFilterChips
-        accounts={accounts.map((a) => ({ id: a.id, name: a.name }))}
-        selectedId={filterId ?? "all"}
-      />
-      <div className="px-4 pb-6">
-        {grouped.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
-            <p className="text-[14px] font-medium text-ink">No transactions.</p>
-            <p className="mt-1 text-[12px] text-muted">
-              Tap + to add your first one.
-            </p>
-          </div>
-        ) : (
-          grouped.map(([date, items]) => (
-            <div key={date} className="mb-4">
-              <div className="px-1 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted">
-                {new Date(date).toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </div>
-              <div className="divide-y divide-border rounded-2xl border border-border bg-surface px-2 shadow-card">
-                {items.map((t) => (
-                  <TransactionRow
-                    key={t.id}
-                    transaction={t}
-                    showAccount={accountNameById.get(t.account_id)}
-                    href={`/transactions/${t.id}`}
-                  />
-                ))}
-              </div>
+      <div className="mx-auto w-full max-w-md lg:max-w-5xl lg:px-8">
+        <PageHeader
+          eyebrow="Activity"
+          title="All transactions"
+          subtitle={`${txns.length} total`}
+        />
+        <TransactionFilterChips
+          accounts={accounts.map((a) => ({ id: a.id, name: a.name }))}
+          selectedId={filterId ?? "all"}
+        />
+        <div className="px-4 pb-6 lg:px-0">
+          {grouped.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
+              <p className="text-[14px] font-medium text-ink">
+                No transactions.
+              </p>
+              <p className="mt-1 text-[12px] text-muted">
+                Tap + to add your first one.
+              </p>
             </div>
-          ))
-        )}
+          ) : (
+            grouped.map(([date, items]) => (
+              <div key={date} className="mb-4">
+                <div className="px-1 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-muted">
+                  {new Date(date).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+                <div className="divide-y divide-border rounded-2xl border border-border bg-surface px-2 shadow-card lg:px-3">
+                  {items.map((t) => (
+                    <TransactionRow
+                      key={t.id}
+                      transaction={t}
+                      showAccount={accountNameById.get(t.account_id)}
+                      href={`/transactions/${t.id}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </>
   );
