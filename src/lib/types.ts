@@ -4,6 +4,8 @@ export type {
   BankLink,
   Goal,
   Profile,
+  SetupStepId,
+  SetupSteps,
   Transaction,
 } from "./db/types";
 

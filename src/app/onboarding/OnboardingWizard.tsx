@@ -13,7 +13,7 @@ const COLORS = {
   savings: "#C9A227",
 };
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 type Props = { initialIncome: number };
 
@@ -72,7 +72,7 @@ export function OnboardingWizard({ initialIncome }: Props) {
           </span>
         </div>
         <div className="flex gap-1.5">
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <span
               key={s}
               className={cn(
@@ -203,6 +203,56 @@ export function OnboardingWizard({ initialIncome }: Props) {
             </p>
           </>
         ) : null}
+
+        {step === 4 ? (
+          <>
+            <h1 className="text-[26px] font-semibold leading-tight">
+              How treebudget tracks vs. your real bank
+            </h1>
+            <p className="mt-1 text-[14px] text-muted">
+              One quick honesty check before you start.
+            </p>
+            <div className="mt-6 space-y-3">
+              <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+                <div className="text-[13px] font-semibold text-ink">
+                  treebudget tracks the three buckets
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  Every time you tag income, the app applies your split. The
+                  math is always right.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+                <div className="text-[13px] font-semibold text-ink">
+                  To make them real, your money has to move at your bank
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  treebudget is read-only and can&apos;t transfer money for
+                  you. We&apos;ll show you exactly how to set it up at your
+                  bank — open separate accounts, split your direct deposit,
+                  schedule auto-transfers. It&apos;s a one-time setup.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+                <div className="text-[13px] font-semibold text-ink">
+                  Or just use it as a tracker
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  If opening accounts isn&apos;t for you, treat the Spending
+                  balance as your weekly allowance. The app still works.
+                </p>
+              </div>
+            </div>
+            {error ? (
+              <div className="mt-4 rounded-2xl border border-danger/40 bg-danger/5 px-4 py-2.5 text-[13px] text-danger">
+                {error}
+              </div>
+            ) : null}
+            <p className="mt-4 px-1 text-[12px] text-muted">
+              You&apos;ll find the full setup guide in Settings → Make it real.
+            </p>
+          </>
+        ) : null}
       </main>
 
       <footer className="px-4 pb-6 pt-4">
@@ -211,7 +261,8 @@ export function OnboardingWizard({ initialIncome }: Props) {
           onClick={() => {
             if (step === 1 && income > 0) setStep(2);
             else if (step === 2 && valid) setStep(3);
-            else if (step === 3) finish();
+            else if (step === 3) setStep(4);
+            else if (step === 4) finish();
           }}
           disabled={
             (step === 1 && income <= 0) ||
@@ -232,12 +283,16 @@ export function OnboardingWizard({ initialIncome }: Props) {
               ? "Continue"
               : step === 2
                 ? "Looks good"
-                : "Take me in"}
+                : step === 3
+                  ? "Got it"
+                  : "Take me in"}
         </button>
         {step > 1 && !isPending ? (
           <button
             type="button"
-            onClick={() => setStep((s) => (s === 3 ? 2 : 1) as Step)}
+            onClick={() =>
+              setStep((s) => (s === 4 ? 3 : s === 3 ? 2 : 1) as Step)
+            }
             className="mt-2 block w-full text-center text-[13px] font-medium text-muted"
           >
             Back

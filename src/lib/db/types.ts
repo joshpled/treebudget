@@ -5,12 +5,23 @@ export type AccountKind =
   | "investment"
   | "other";
 
+export type SetupStepId =
+  | "spending_account"
+  | "savings_account"
+  | "connected_in_app"
+  | "direct_deposit_split"
+  | "auto_transfers";
+
+export type SetupSteps = Partial<Record<SetupStepId, boolean>>;
+
 export type Profile = {
   id: string;
   full_name: string | null;
   display_name: string | null;
   monthly_income: number;
   onboarded_at: string | null;
+  setup_steps: SetupSteps;
+  setup_dismissed_at: string | null;
   created_at: string;
   updated_at: string;
 };
