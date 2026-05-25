@@ -28,10 +28,11 @@ export default async function AccountsPage() {
   return (
     <>
       <TopBar back={{ href: "/settings", label: "Settings" }} title="Accounts" />
-      <PageHeader
-        eyebrow="Setup"
-        title="Your accounts"
-        subtitle="The 3 core accounts power the auto-split. Connect a bank to sync transactions."
+      <div className="mx-auto w-full max-w-md lg:max-w-5xl lg:px-8">
+        <PageHeader
+          eyebrow="Setup"
+          title="Your accounts"
+          subtitle="The 3 core accounts power the auto-split. Connect a bank to sync transactions."
       />
 
       <section className="px-4 pb-4">
@@ -120,6 +121,7 @@ export default async function AccountsPage() {
           />
         </div>
       </section>
+      </div>
     </>
   );
 }

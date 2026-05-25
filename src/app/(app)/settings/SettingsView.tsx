@@ -78,33 +78,39 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
   return (
     <>
       <TopBar />
-      <PageHeader
-        eyebrow="You"
-        title={displayName}
-        subtitle={email ?? "Personal preferences and account setup."}
-      />
+      <div className="mx-auto w-full max-w-md lg:max-w-5xl lg:px-8">
+        <PageHeader
+          eyebrow="You"
+          title={displayName}
+          subtitle={email ?? "Personal preferences and account setup."}
+        />
 
-      <Section title="Money">
-        {moneySection.map((item) => (
-          <Row key={item.label} item={item} />
-        ))}
-      </Section>
+        <div className="grid gap-0 lg:grid-cols-2 lg:gap-x-6">
+          <Section title="Money">
+            {moneySection.map((item) => (
+              <Row key={item.label} item={item} />
+            ))}
+          </Section>
 
-      <Section title="App">
-        {appSection.map((item) => (
-          <Row key={item.label} item={item} />
-        ))}
-      </Section>
+          <Section title="App">
+            {appSection.map((item) => (
+              <Row key={item.label} item={item} />
+            ))}
+          </Section>
 
-      <Section title="Account">
-        <SignOutButton />
-        <DemoDataButton />
-        <ResetAccountButton />
-      </Section>
+          <div className="lg:col-span-2">
+            <Section title="Account">
+              <SignOutButton />
+              <DemoDataButton />
+              <ResetAccountButton />
+            </Section>
+          </div>
+        </div>
 
-      <p className="px-4 pb-8 pt-2 text-center text-[12px] text-muted">
-        treebudget · v0.2
-      </p>
+        <p className="px-4 pb-8 pt-2 text-center text-[12px] text-muted">
+          treebudget · v0.2
+        </p>
+      </div>
     </>
   );
 }

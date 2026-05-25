@@ -16,7 +16,7 @@ export function BottomNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="sticky bottom-0 z-20 border-t border-border bg-surface/95 backdrop-blur"
+      className="sticky bottom-0 z-20 border-t border-border bg-surface/95 backdrop-blur lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto grid max-w-md grid-cols-4">

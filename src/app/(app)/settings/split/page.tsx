@@ -23,13 +23,15 @@ export default async function SplitEditorPage() {
         back={{ href: "/settings", label: "Settings" }}
         title="Income & split"
       />
-      <SplitEditor
-        initialIncome={Number(profile?.monthly_income ?? 6000)}
-        initialBills={initialBills}
-        initialSpending={initialSpending}
-        initialSavings={initialSavings}
-        redirectTo="/settings"
-      />
+      <div className="mx-auto w-full max-w-md lg:max-w-2xl lg:px-8">
+        <SplitEditor
+          initialIncome={Number(profile?.monthly_income ?? 6000)}
+          initialBills={initialBills}
+          initialSpending={initialSpending}
+          initialSavings={initialSavings}
+          redirectTo="/settings"
+        />
+      </div>
     </>
   );
 }

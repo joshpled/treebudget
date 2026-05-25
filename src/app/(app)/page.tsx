@@ -60,91 +60,111 @@ export default async function HomePage() {
           </>
         }
       />
-      <section className="px-4 pb-2 pt-5">
-        <div className="text-[13px] text-muted">
-          {greeting()}, {firstName}.
-        </div>
-        <div className="mt-1">
-          <div className="text-[12px] uppercase tracking-wide text-muted">
-            Total balance
+      <div className="mx-auto w-full max-w-md lg:max-w-6xl lg:px-8">
+        <section className="px-4 pb-2 pt-5 lg:px-0 lg:pt-8">
+          <div className="text-[13px] text-muted">
+            {greeting()}, {firstName}.
           </div>
-          <div className="tabular text-[40px] font-semibold leading-none">
-            {formatCurrency(total)}
-          </div>
-        </div>
-      </section>
-
-      {showSetupCard ? (
-        <SetupProgressCard doneCount={setupDone} total={SETUP_STEPS.length} />
-      ) : null}
-
-      <section className="space-y-3 px-4 pt-4">
-        {accounts.map((account) => (
-          <AccountCard
-            key={account.id}
-            account={account}
-            monthlyAllocation={income * Number(account.allocation)}
-            href={`/transactions?account=${account.id}`}
-          />
-        ))}
-      </section>
-
-      <section className="mx-4 mt-6 rounded-2xl border border-border bg-surface p-4 shadow-card">
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <div className="text-[12px] uppercase tracking-wide text-muted">
-              Income split
+          <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <div className="text-[12px] uppercase tracking-wide text-muted">
+                Total balance
+              </div>
+              <div className="tabular text-[40px] font-semibold leading-none lg:text-[48px]">
+                {formatCurrency(total)}
+              </div>
             </div>
-            <div className="text-[15px] font-semibold">
-              Each paycheck of {formatCurrency(income / 2, { showCents: false })}
+            <div className="hidden text-right text-[12px] text-muted lg:block">
+              <div>Monthly income</div>
+              <div className="tabular text-[18px] font-semibold text-ink">
+                {formatCurrency(income, { showCents: false })}
+              </div>
             </div>
           </div>
-          <Link
-            href="/settings/split"
-            className="text-[13px] font-medium text-primary"
-          >
-            Edit
-          </Link>
-        </div>
-        <SplitDonut
-          slices={slices}
-          centerLabel="Monthly income"
-          centerValue={formatCurrency(income, { showCents: false })}
-        />
-      </section>
+        </section>
 
-      <section className="mt-6 px-4">
-        <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-[15px] font-semibold">Recent activity</h2>
-          <Link
-            href="/transactions"
-            className="flex items-center gap-1 text-[13px] font-medium text-primary"
-          >
-            See all <ChevronRight size={14} />
-          </Link>
-        </div>
-        {recent.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
-            <p className="text-[14px] font-medium text-ink">No activity yet.</p>
-            <p className="mt-1 text-[12px] text-muted">
-              Add a transaction with the + button, or connect a bank later.
-            </p>
+        {showSetupCard ? (
+          <div className="lg:px-0">
+            <SetupProgressCard
+              doneCount={setupDone}
+              total={SETUP_STEPS.length}
+            />
           </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {recent.map((t) => (
-              <TransactionRow
-                key={t.id}
-                transaction={t}
-                showAccount={accountNameById.get(t.account_id)}
-                href={`/transactions/${t.id}`}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+        ) : null}
 
-      <div className="h-8" />
+        <section className="grid gap-3 px-4 pt-4 lg:grid-cols-3 lg:px-0 lg:pt-6">
+          {accounts.map((account) => (
+            <AccountCard
+              key={account.id}
+              account={account}
+              monthlyAllocation={income * Number(account.allocation)}
+              href={`/transactions?account=${account.id}`}
+            />
+          ))}
+        </section>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-5 lg:gap-6">
+          <section className="mx-4 rounded-2xl border border-border bg-surface p-4 shadow-card lg:mx-0 lg:col-span-2">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[12px] uppercase tracking-wide text-muted">
+                  Income split
+                </div>
+                <div className="text-[15px] font-semibold">
+                  Each paycheck of{" "}
+                  {formatCurrency(income / 2, { showCents: false })}
+                </div>
+              </div>
+              <Link
+                href="/settings/split"
+                className="text-[13px] font-medium text-primary"
+              >
+                Edit
+              </Link>
+            </div>
+            <SplitDonut
+              slices={slices}
+              centerLabel="Monthly income"
+              centerValue={formatCurrency(income, { showCents: false })}
+            />
+          </section>
+
+          <section className="px-4 lg:col-span-3 lg:px-0">
+            <div className="mb-1 flex items-center justify-between">
+              <h2 className="text-[15px] font-semibold">Recent activity</h2>
+              <Link
+                href="/transactions"
+                className="flex items-center gap-1 text-[13px] font-medium text-primary"
+              >
+                See all <ChevronRight size={14} />
+              </Link>
+            </div>
+            {recent.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-transparent p-6 text-center">
+                <p className="text-[14px] font-medium text-ink">
+                  No activity yet.
+                </p>
+                <p className="mt-1 text-[12px] text-muted">
+                  Add a transaction with the + button, or connect a bank later.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border lg:rounded-2xl lg:border lg:border-border lg:bg-surface lg:px-3 lg:shadow-card">
+                {recent.map((t) => (
+                  <TransactionRow
+                    key={t.id}
+                    transaction={t}
+                    showAccount={accountNameById.get(t.account_id)}
+                    href={`/transactions/${t.id}`}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="h-8 lg:h-12" />
+      </div>
     </>
   );
 }
