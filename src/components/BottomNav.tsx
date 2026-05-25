@@ -6,7 +6,7 @@ import { Home, Receipt, Target, Settings } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const TABS = [
-  { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Home", icon: Home },
   { href: "/transactions", label: "Activity", icon: Receipt },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -22,8 +22,8 @@ export function BottomNav() {
       <ul className="mx-auto grid max-w-md grid-cols-4">
         {TABS.map((tab) => {
           const active =
-            tab.href === "/"
-              ? pathname === "/"
+            tab.href === "/dashboard"
+              ? pathname === "/dashboard"
               : pathname.startsWith(tab.href);
           const Icon = tab.icon;
           return (

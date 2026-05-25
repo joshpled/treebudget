@@ -31,7 +31,7 @@ export function SignInForm({ next }: Props) {
         setError(authError.message);
         return;
       }
-      router.replace(next && next.startsWith("/") ? next : "/");
+      router.replace(next && next.startsWith("/") ? next : "/dashboard");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");

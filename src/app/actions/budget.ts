@@ -68,7 +68,7 @@ export async function completeOnboarding(input: SaveSplitInput) {
     .eq("id", user.id);
   if (error) throw error;
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/dashboard");
 }
 
 const transactionSchema = z.object({
@@ -302,5 +302,5 @@ export async function loadDemoData() {
     .eq("id", user.id);
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/dashboard");
 }

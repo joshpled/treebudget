@@ -28,7 +28,7 @@ export default async function SetupPage() {
 
   return (
     <>
-      <TopBar back={{ href: "/", label: "Home" }} title="Set it up for real" />
+      <TopBar back={{ href: "/dashboard", label: "Home" }} title="Set it up for real" />
       <div className="mx-auto w-full max-w-md lg:max-w-6xl lg:px-8">
         <PageHeader
           eyebrow={`Progress · ${doneCount}/${SETUP_STEPS.length}`}
