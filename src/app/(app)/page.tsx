@@ -6,9 +6,11 @@ import { SplitDonut } from "@/components/SplitDonut";
 import { TransactionRow } from "@/components/TransactionRow";
 import { UserAvatar } from "@/components/auth/UserAvatar";
 import { AddTransactionLauncher } from "@/components/transactions/AddTransactionLauncher";
+import { SetupProgressCard } from "@/components/setup/SetupProgressCard";
 import { listAccounts } from "@/lib/db/accounts";
 import { listTransactions } from "@/lib/db/transactions";
 import { getCurrentProfile } from "@/lib/db/profile";
+import { SETUP_STEPS } from "@/lib/setup/content";
 import { formatCurrency, greeting } from "@/lib/format";
 
 const KIND_COLOR: Record<string, string> = {
@@ -29,6 +31,12 @@ export default async function HomePage() {
     profile?.full_name?.split(" ")[0] ??
     profile?.display_name?.split(" ")[0] ??
     "there";
+
+  const setupSteps = profile?.setup_steps ?? {};
+  const setupDone = SETUP_STEPS.filter((s) => !!setupSteps[s.id]).length;
+  const setupAllDone = setupDone >= SETUP_STEPS.length;
+  const showSetupCard =
+    !!profile && !profile.setup_dismissed_at && !setupAllDone;
 
   const total = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
 
@@ -65,6 +73,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {showSetupCard ? (
+        <SetupProgressCard doneCount={setupDone} total={SETUP_STEPS.length} />
+      ) : null}
 
       <section className="space-y-3 px-4 pt-4">
         {accounts.map((account) => (

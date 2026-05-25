@@ -8,6 +8,7 @@ import {
   Moon,
   ShieldCheck,
   HelpCircle,
+  Sprout,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -58,6 +59,12 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
       icon: Link2,
       label: "Connect a bank",
       hint: "Powered by Plaid",
+    },
+    {
+      href: "/setup",
+      icon: Sprout,
+      label: "Make it real at your bank",
+      hint: "Setup guide + payroll snippet",
     },
   ];
 
