@@ -8,7 +8,12 @@ import { UserAvatar } from "./auth/UserAvatar";
 import { cn } from "@/lib/cn";
 
 const NAV = [
-  { href: "/", label: "Home", icon: Home, match: (p: string) => p === "/" },
+  {
+    href: "/dashboard",
+    label: "Home",
+    icon: Home,
+    match: (p: string) => p === "/dashboard",
+  },
   {
     href: "/transactions",
     label: "Activity",
@@ -43,7 +48,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
-      <Link href="/" className="flex items-center gap-2 px-5 pt-6 pb-5">
+      <Link href="/dashboard" className="flex items-center gap-2 px-5 pt-6 pb-5">
         <TreeMark size={24} />
         <span className="text-[16px] font-semibold tracking-tight">
           treebudget

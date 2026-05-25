@@ -5,7 +5,7 @@ import { OnboardingWizard } from "./OnboardingWizard";
 export default async function OnboardingPage() {
   const profile = await getCurrentProfile();
   if (profile?.onboarded_at) {
-    redirect("/");
+    redirect("/dashboard");
   }
   return (
     <OnboardingWizard

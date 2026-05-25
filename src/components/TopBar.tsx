@@ -26,7 +26,7 @@ export function TopBar({ title, back, right }: Props) {
               <span>{back.label ?? "Back"}</span>
             </Link>
           ) : (
-            <Link href="/" className="flex items-center gap-2 lg:hidden">
+            <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
               <TreeMark size={22} />
               <span className="text-[15px] font-semibold tracking-tight">
                 treebudget

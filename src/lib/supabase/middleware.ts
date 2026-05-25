@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv } from "./env";
 
 const PUBLIC_PATHS = [
+  "/",
+  "/pricing",
   "/sign-in",
   "/sign-up",
   "/auth/callback",
@@ -10,6 +12,9 @@ const PUBLIC_PATHS = [
   "/check-email",
   "/api/plaid/webhook",
 ];
+
+// Marketing pages a signed-in user shouldn't sit on — bump them to the app.
+const SIGNED_IN_BOUNCE = new Set(["/", "/sign-in", "/sign-up"]);
 
 const ONBOARDING_EXEMPT = [
   "/onboarding",
@@ -61,9 +66,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectTo);
   }
 
-  if (user && (pathname === "/sign-in" || pathname === "/sign-up")) {
+  if (user && SIGNED_IN_BOUNCE.has(pathname)) {
     const redirectTo = request.nextUrl.clone();
-    redirectTo.pathname = "/";
+    redirectTo.pathname = "/dashboard";
     redirectTo.search = "";
     return NextResponse.redirect(redirectTo);
   }

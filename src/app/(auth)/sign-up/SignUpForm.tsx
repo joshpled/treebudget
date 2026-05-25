@@ -49,7 +49,7 @@ export function SignUpForm({ next }: Props) {
         router.replace(`/check-email?email=${encodeURIComponent(email)}`);
         return;
       }
-      router.replace(next && next.startsWith("/") ? next : "/");
+      router.replace(next && next.startsWith("/") ? next : "/dashboard");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-up failed.");
