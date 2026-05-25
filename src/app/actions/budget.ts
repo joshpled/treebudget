@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPlaidClient } from "@/lib/plaid";
 import { decryptToken } from "@/lib/crypto";
 import { safePlaidError } from "@/lib/plaid/errors";
+import { buildDemoBundle } from "@/lib/demo/seed";
 
 const splitSchema = z
   .object({
@@ -193,4 +194,113 @@ export async function resetAccount() {
 
   revalidatePath("/", "layout");
   redirect("/onboarding");
+}
+
+/**
+ * Replace the signed-in user's data with a realistic-looking demo set:
+ * ~80 transactions across the three buckets, four bi-weekly paychecks with
+ * manual transfers, and a few savings goals. Useful for showing the app
+ * off on a fresh account. Like resetAccount, it removes Plaid items and
+ * keeps the auth user / login intact.
+ */
+export async function loadDemoData() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
+
+  // Best-effort Plaid unlink — demo accounts shouldn't keep a bank attached.
+  const { data: links } = await supabase
+    .from("bank_links")
+    .select("access_token_encrypted")
+    .eq("user_id", user.id);
+  for (const link of links ?? []) {
+    try {
+      const plaid = getPlaidClient();
+      await plaid.itemRemove({
+        access_token: decryptToken(link.access_token_encrypted),
+      });
+    } catch (err) {
+      console.error("loadDemoData itemRemove failed:", safePlaidError(err));
+    }
+  }
+
+  // Wipe owned rows before seeding.
+  await supabase.from("transactions").delete().eq("user_id", user.id);
+  await supabase.from("goals").delete().eq("user_id", user.id);
+  await supabase.from("bank_links").delete().eq("user_id", user.id);
+
+  // Reset the three core accounts to default names / allocations.
+  for (const kind of ["bills", "spending", "savings"] as const) {
+    const { error } = await supabase
+      .from("accounts")
+      .update({
+        name: DEFAULT_ACCOUNTS[kind].name,
+        balance: 0,
+        plaid_account_id: null,
+        bank_link_id: null,
+        allocation: DEFAULT_ACCOUNTS[kind].allocation,
+      })
+      .eq("user_id", user.id)
+      .eq("kind", kind);
+    if (error) throw error;
+  }
+
+  // Look up the three account ids now that they're reset.
+  const { data: accountRows, error: accountsError } = await supabase
+    .from("accounts")
+    .select("id, kind")
+    .eq("user_id", user.id)
+    .in("kind", ["bills", "spending", "savings"]);
+  if (accountsError) throw accountsError;
+  const byKind = new Map<string, string>(
+    (accountRows ?? []).map((a) => [a.kind as string, a.id as string]),
+  );
+  const billsId = byKind.get("bills");
+  const spendingId = byKind.get("spending");
+  const savingsId = byKind.get("savings");
+  if (!billsId || !spendingId || !savingsId) {
+    throw new Error("Core accounts missing — sign up may not have seeded.");
+  }
+
+  const { transactions, goals, balances } = buildDemoBundle(user.id, {
+    bills: billsId,
+    spending: spendingId,
+    savings: savingsId,
+  });
+
+  // Chunk inserts to keep the request payloads reasonable.
+  const CHUNK = 50;
+  for (let i = 0; i < transactions.length; i += CHUNK) {
+    const { error } = await supabase
+      .from("transactions")
+      .insert(transactions.slice(i, i + CHUNK));
+    if (error) throw error;
+  }
+  if (goals.length > 0) {
+    const { error } = await supabase.from("goals").insert(goals);
+    if (error) throw error;
+  }
+
+  // Set realistic ending balances.
+  for (const [kind, id] of [
+    ["bills", billsId],
+    ["spending", spendingId],
+    ["savings", savingsId],
+  ] as const) {
+    await supabase
+      .from("accounts")
+      .update({ balance: balances[kind] })
+      .eq("id", id);
+  }
+
+  // Mark onboarded so they land on Home (and an income figure to match).
+  await supabase
+    .from("profiles")
+    .update({ monthly_income: 5000, onboarded_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  revalidatePath("/", "layout");
+  redirect("/");
 }

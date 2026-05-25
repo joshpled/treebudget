@@ -14,6 +14,7 @@ import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ResetAccountButton } from "@/components/ResetAccountButton";
+import { DemoDataButton } from "@/components/DemoDataButton";
 import type { Account } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
@@ -90,6 +91,7 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
 
       <Section title="Account">
         <SignOutButton />
+        <DemoDataButton />
         <ResetAccountButton />
       </Section>
 
