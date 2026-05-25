@@ -33,6 +33,7 @@ export type Account = {
   name: string;
   allocation: number;
   balance: number;
+  plaid_balance: number | null;
   is_card: boolean;
   archived: boolean;
   position: number;
@@ -53,6 +54,8 @@ export type Transaction = {
   posted_at: string;
   external_source: string | null;
   external_id: string | null;
+  split_applied: boolean;
+  parent_transaction_id: string | null;
   created_at: string;
 };
 

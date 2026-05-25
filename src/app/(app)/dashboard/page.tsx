@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles, Plus } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
 import { SplitDonut } from "@/components/SplitDonut";
@@ -11,6 +11,7 @@ import { listAccounts } from "@/lib/db/accounts";
 import { listTransactions } from "@/lib/db/transactions";
 import { getCurrentProfile } from "@/lib/db/profile";
 import { SETUP_STEPS } from "@/lib/setup/content";
+import { computeBalanceHistory } from "@/lib/balanceHistory";
 import { formatCurrency, greeting } from "@/lib/format";
 
 const KIND_COLOR: Record<string, string> = {
@@ -20,11 +21,18 @@ const KIND_COLOR: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  const [profile, accounts, recent] = await Promise.all([
+  const [profile, accounts, recent, allTxns] = await Promise.all([
     getCurrentProfile(),
     listAccounts(),
     listTransactions({ limit: 5 }),
+    // Fetch a 60-day window to derive per-account sparkline history without
+    // a second round-trip per card.
+    listTransactions({ limit: 500 }),
   ]);
+  const historyByAccount = new Map<string, number[]>();
+  for (const a of accounts) {
+    historyByAccount.set(a.id, computeBalanceHistory(a, allTxns, 30));
+  }
 
   const income = profile?.monthly_income ?? 0;
   const firstName =
@@ -98,10 +106,42 @@ export default async function HomePage() {
               key={account.id}
               account={account}
               monthlyAllocation={income * Number(account.allocation)}
+              history={historyByAccount.get(account.id) ?? []}
               href={`/transactions?account=${account.id}`}
             />
           ))}
         </section>
+
+        {allTxns.length === 0 ? (
+          <section className="mx-4 mt-6 rounded-2xl border border-dashed border-border bg-transparent p-6 text-center lg:mx-0">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary-ink">
+              <Sparkles size={18} />
+            </div>
+            <p className="mt-3 text-[15px] font-semibold text-ink">
+              Get started in 30 seconds
+            </p>
+            <p className="mt-1 text-[13px] text-muted">
+              Add your first transaction or connect a bank to pull in real
+              activity. Or load demo data to see the app in action.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <AddTransactionLauncher accounts={accounts} />
+              <Link
+                href="/settings/accounts"
+                className="rounded-full border border-border bg-bg px-4 py-2 text-[13px] font-medium text-ink"
+              >
+                <Plus size={14} className="-mt-0.5 mr-1 inline" />
+                Connect a bank
+              </Link>
+              <Link
+                href="/settings"
+                className="rounded-full border border-border bg-bg px-4 py-2 text-[13px] font-medium text-ink"
+              >
+                Load demo data
+              </Link>
+            </div>
+          </section>
+        ) : null}
 
         <div className="mt-6 grid gap-4 lg:grid-cols-5 lg:gap-6">
           <section className="mx-4 rounded-2xl border border-border bg-surface p-4 shadow-card lg:mx-0 lg:col-span-2">
