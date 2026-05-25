@@ -95,6 +95,21 @@ export function AccountCard({
           />
         ) : null}
       </div>
+      {account.plaid_balance !== null &&
+      Math.abs(Number(account.plaid_balance) - Number(account.balance)) >
+        0.01 ? (
+        <div className="rounded-xl bg-bg px-3 py-2 text-[11px] text-muted">
+          Bank says{" "}
+          <span className="tabular font-semibold text-ink">
+            {formatCurrency(Number(account.plaid_balance))}
+          </span>
+          {" · "}
+          bucket is{" "}
+          <span className="tabular font-semibold text-ink">
+            {formatCurrency(Number(account.balance))}
+          </span>
+        </div>
+      ) : null}
     </>
   );
 

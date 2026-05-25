@@ -34,11 +34,26 @@ export async function refreshAccountsForLink(
     balance: Number(a.balances.current ?? a.balances.available ?? 0),
   }));
 
-  // Update balance for any treebudget account already linked to a Plaid id.
+  // Update plaid_balance (the bank's reading) for every linked account.
+  // Seed the bucket balance from Plaid ONLY the first time a bucket links
+  // — after that the bucket is treebudget's authoritative ledger and
+  // shouldn't be clobbered by Plaid's number.
   for (const s of summaries) {
+    const { data: existing } = await supabase
+      .from("accounts")
+      .select("balance")
+      .eq("user_id", userId)
+      .eq("plaid_account_id", s.plaid_account_id)
+      .maybeSingle();
+    const update: { plaid_balance: number; balance?: number } = {
+      plaid_balance: s.balance,
+    };
+    if (existing && Number(existing.balance) === 0 && s.balance !== 0) {
+      update.balance = s.balance;
+    }
     await supabase
       .from("accounts")
-      .update({ balance: s.balance })
+      .update(update)
       .eq("user_id", userId)
       .eq("plaid_account_id", s.plaid_account_id);
   }
