@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { signIn, E2E_EMAIL } from "./helpers";
+import { signIn, ensureOnboarded, E2E_EMAIL } from "./helpers";
 
 test.describe("Auth", () => {
   test("gated route bounces an unauthenticated visitor to /sign-in", async ({
@@ -34,14 +34,19 @@ test.describe("Auth", () => {
     await page.getByLabel("Email").fill(E2E_EMAIL);
     await page.getByLabel("Password").fill("this-is-not-the-password");
     await page.getByRole("button", { name: /^Sign in$/ }).click();
-    await expect(page.getByText(/invalid|credentials|password/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    // Supabase rejects with "Invalid login credentials". Wait for either
+    // that specific text or for the button to leave its "Signing in…"
+    // state and the URL to still be sign-in.
+    await expect(
+      page.getByText(/Invalid login credentials/i),
+    ).toBeVisible({ timeout: 15_000 });
     expect(page.url()).toContain("/sign-in");
   });
 
   test("sign out clears the session", async ({ page }) => {
     await signIn(page);
+    // Settings is gated by onboarded_at — make sure we can reach it.
+    await ensureOnboarded(page);
     await page.goto("/settings");
     await page.getByRole("button", { name: /Sign out/i }).click();
     await page.waitForURL(/\/sign-in/);

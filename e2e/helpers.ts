@@ -26,10 +26,39 @@ export async function signIn(page: Page) {
 }
 
 /**
+ * Walk the 4-step onboarding wizard. Internal — assumes we're already on
+ * /onboarding. Returns on /dashboard.
+ */
+async function walkOnboardingWizard(page: Page, income: number) {
+  const incomeInput = page.locator('input[inputmode="decimal"]').first();
+  await incomeInput.fill("");
+  await incomeInput.fill(String(income));
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Looks good" }).click();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await page.getByRole("button", { name: "Take me in" }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+}
+
+/**
+ * Make sure the test account is onboarded so authenticated pages like
+ * /settings are reachable. If the user is still pre-onboarding, walk the
+ * wizard with default values.
+ */
+export async function ensureOnboarded(page: Page) {
+  await page.goto("/dashboard");
+  if (/\/onboarding/.test(page.url())) {
+    await walkOnboardingWizard(page, 5000);
+  }
+}
+
+/**
  * Wipe the test account back to a fresh state. Walks the UI exactly like a
- * user would. Ends on /onboarding.
+ * user would. If the account isn't onboarded yet, onboards it first so
+ * /settings is reachable. Ends on /onboarding.
  */
 export async function resetAccount(page: Page) {
+  await ensureOnboarded(page);
   await page.goto("/settings");
   await page.getByRole("button", { name: "Reset account" }).click();
   // Inline confirmation appears with "Yes, wipe everything".
@@ -48,23 +77,7 @@ export async function completeOnboarding(
 ) {
   const income = opts.income ?? 5000;
   await expect(page).toHaveURL(/\/onboarding$/);
-
-  // Step 1: income
-  const incomeInput = page.locator('input[inputmode="decimal"]').first();
-  await incomeInput.fill("");
-  await incomeInput.fill(String(income));
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  // Step 2: split (defaults 50/30/20 — accept as-is)
-  await page.getByRole("button", { name: "Looks good" }).click();
-
-  // Step 3: confirm
-  await page.getByRole("button", { name: "Got it" }).click();
-
-  // Step 4: how it tracks
-  await page.getByRole("button", { name: "Take me in" }).click();
-
-  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await walkOnboardingWizard(page, income);
 }
 
 /**
