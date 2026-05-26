@@ -18,8 +18,9 @@ test.describe("Transactions — add, edit, delete", () => {
   }) => {
     const before = await readAccountBalance(page, "Spending");
 
-    // Open the Add Transaction sheet via the + button.
-    await page.getByLabel("Add transaction").click();
+    // Open the Add Transaction sheet via the header + button (scoped so we
+    // don't collide with the empty-state card's + button).
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.getByRole("button", { name: /^Spend$/ }).click();
     await page
       .locator('input[inputmode="decimal"]')
@@ -42,7 +43,7 @@ test.describe("Transactions — add, edit, delete", () => {
   }) => {
     const before = await readAccountBalance(page, "Bills");
 
-    await page.getByLabel("Add transaction").click();
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.getByRole("button", { name: /^Income$/ }).click();
     await page.locator('input[inputmode="decimal"]').first().fill("250");
     await page.getByLabel("Merchant").fill("Side Gig");
@@ -57,7 +58,7 @@ test.describe("Transactions — add, edit, delete", () => {
     page,
   }) => {
     // Create one to edit.
-    await page.getByLabel("Add transaction").click();
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.locator('input[inputmode="decimal"]').first().fill("20");
     await page.getByLabel("Merchant").fill("Edit Me");
     await page.getByLabel("Account").selectOption({ label: "Spending" });
@@ -87,7 +88,7 @@ test.describe("Transactions — add, edit, delete", () => {
   }) => {
     const before = await readAccountBalance(page, "Spending");
 
-    await page.getByLabel("Add transaction").click();
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.locator('input[inputmode="decimal"]').first().fill("33.33");
     await page.getByLabel("Merchant").fill("Delete Me");
     await page.getByLabel("Account").selectOption({ label: "Spending" });
