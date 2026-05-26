@@ -185,10 +185,16 @@ export async function resetAccount() {
     if (error) throw error;
   }
 
-  // Restart onboarding.
+  // Restart onboarding. Also clear setup progress + dismissal so a reset
+  // means a truly fresh account.
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({ monthly_income: 6000, onboarded_at: null })
+    .update({
+      monthly_income: 6000,
+      onboarded_at: null,
+      setup_steps: {},
+      setup_dismissed_at: null,
+    })
     .eq("id", user.id);
   if (profileError) throw profileError;
 
@@ -573,9 +579,15 @@ export async function loadDemoData() {
   }
 
   // Mark onboarded so they land on Home (and an income figure to match).
+  // Clear setup progress + dismissal too — demo accounts should feel fresh.
   await supabase
     .from("profiles")
-    .update({ monthly_income: 5000, onboarded_at: new Date().toISOString() })
+    .update({
+      monthly_income: 5000,
+      onboarded_at: new Date().toISOString(),
+      setup_steps: {},
+      setup_dismissed_at: null,
+    })
     .eq("id", user.id);
 
   revalidatePath("/", "layout");
