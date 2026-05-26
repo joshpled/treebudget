@@ -53,7 +53,7 @@ export function UserAvatar() {
   return (
     <Link
       href="/settings"
-      aria-label="Account"
+      aria-label="Your account"
       className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary-soft text-[12px] font-semibold uppercase text-primary-ink"
     >
       {user?.avatarUrl ? (
