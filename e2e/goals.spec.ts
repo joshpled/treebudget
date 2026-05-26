@@ -32,6 +32,12 @@ test.describe("Goals CRUD", () => {
     await targetField.fill("4000");
     await page.getByRole("button", { name: /Save changes/i }).click();
 
+    // Wait for the refresh to settle — the goal card's text reflects the
+    // new target before we re-open the edit sheet.
+    await expect(
+      page.getByText("/ $4,000").first(),
+    ).toBeVisible({ timeout: 15_000 });
+
     // Reopen to confirm the value persisted.
     await page.getByText("Iceland trip").click();
     await expect(page.getByLabel("Target ($)")).toHaveValue("4000");

@@ -17,7 +17,7 @@ test.describe("Auto-split on tagged income", () => {
     page,
   }) => {
     // Add an income transaction to Bills.
-    await page.getByLabel("Add transaction").click();
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.getByRole("button", { name: /^Income$/ }).click();
     await page.locator('input[inputmode="decimal"]').first().fill("2000");
     await page.getByLabel("Merchant").fill("Paycheck");
@@ -77,7 +77,7 @@ test.describe("Auto-split on tagged income", () => {
 
   test("editing a split-applied income is rejected", async ({ page }) => {
     // Set up a split paycheck.
-    await page.getByLabel("Add transaction").click();
+    await page.locator("header").getByLabel("Add transaction").click();
     await page.getByRole("button", { name: /^Income$/ }).click();
     await page.locator('input[inputmode="decimal"]').first().fill("1500");
     await page.getByLabel("Merchant").fill("Locked Paycheck");
