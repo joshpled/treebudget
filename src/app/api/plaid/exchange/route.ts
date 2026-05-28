@@ -42,10 +42,8 @@ export async function POST(req: NextRequest) {
   try {
     body = schema.parse(await req.json());
   } catch (err) {
-    return NextResponse.json(
-      { error: "Invalid request body", details: String(err) },
-      { status: 400 },
-    );
+    console.error("exchange POST validation error:", err);
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const plaid = getPlaidClient();
@@ -123,10 +121,8 @@ export async function PUT(req: NextRequest) {
   try {
     body = mappingSchema.parse(await req.json());
   } catch (err) {
-    return NextResponse.json(
-      { error: "Invalid request body", details: String(err) },
-      { status: 400 },
-    );
+    console.error("exchange PUT validation error:", err);
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   // Confirm the bank link belongs to this user BEFORE mutating any account

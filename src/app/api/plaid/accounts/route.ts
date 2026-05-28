@@ -23,10 +23,8 @@ export async function POST(req: NextRequest) {
   try {
     body = schema.parse(await req.json());
   } catch (err) {
-    return NextResponse.json(
-      { error: "Invalid request body", details: String(err) },
-      { status: 400 },
-    );
+    console.error("accounts POST validation error:", err);
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const { data: link } = await supabase

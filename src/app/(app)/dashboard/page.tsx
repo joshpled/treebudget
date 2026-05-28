@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, Sparkles, Plus } from "lucide-react";
+import { PushTestButton } from "@/components/PushTestButton";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
 import { SplitDonut } from "@/components/SplitDonut";
@@ -201,6 +202,13 @@ export default async function HomePage() {
               </div>
             )}
           </section>
+        </div>
+
+        <div className="mx-4 mt-6 flex items-center gap-3 lg:mx-0">
+          <span className="text-[12px] uppercase tracking-wide text-muted">
+            Dev
+          </span>
+          <PushTestButton />
         </div>
 
         <div className="h-8 lg:h-12" />

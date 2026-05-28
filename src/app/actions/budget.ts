@@ -241,8 +241,8 @@ export async function updateTransaction(
   }
 
   // Reverse the old amount on its old account, then apply the new one.
-  await adjustAccountBalance(supabase, old.account_id, -Number(old.amount));
-  await adjustAccountBalance(supabase, parsed.account_id, parsed.amount);
+  await adjustAccountBalance(supabase, old.account_id, -Number(old.amount), user.id);
+  await adjustAccountBalance(supabase, parsed.account_id, parsed.amount, user.id);
 
   const { error } = await supabase
     .from("transactions")
@@ -254,7 +254,8 @@ export async function updateTransaction(
       note: parsed.note ?? null,
       ...(parsed.posted_at ? { posted_at: parsed.posted_at } : {}),
     })
-    .eq("id", parsed.id);
+    .eq("id", parsed.id)
+    .eq("user_id", user.id);
   if (error) throw error;
 
   revalidatePath("/", "layout");
@@ -281,7 +282,7 @@ export async function deleteTransaction(id: string) {
     throw new Error("Delete by undoing the parent split.");
   }
 
-  await adjustAccountBalance(supabase, txn.account_id, -Number(txn.amount));
+  await adjustAccountBalance(supabase, txn.account_id, -Number(txn.amount), user.id);
   const { error } = await supabase.from("transactions").delete().eq("id", id);
   if (error) throw error;
 
@@ -448,7 +449,7 @@ export async function undoIncomeSplit(input: { transaction_id: string }) {
       );
     }
     for (const [accountId, delta] of deltas) {
-      await adjustAccountBalance(supabase, accountId, delta);
+      await adjustAccountBalance(supabase, accountId, delta, user.id);
     }
     await supabase
       .from("transactions")
@@ -468,15 +469,21 @@ async function adjustAccountBalance(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   accountId: string,
   delta: number,
+  userId: string,
 ) {
   const { data: account } = await supabase
     .from("accounts")
     .select("balance")
     .eq("id", accountId)
+    .eq("user_id", userId)
     .maybeSingle();
   if (!account) return;
   const next = Math.round((Number(account.balance) + delta) * 100) / 100;
-  await supabase.from("accounts").update({ balance: next }).eq("id", accountId);
+  await supabase
+    .from("accounts")
+    .update({ balance: next })
+    .eq("id", accountId)
+    .eq("user_id", userId);
 }
 
 /**

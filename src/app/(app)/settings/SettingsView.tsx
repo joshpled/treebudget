@@ -69,7 +69,7 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
   ];
 
   const appSection: Item[] = [
-    { icon: Bell, label: "Notifications", disabled: true },
+    { href: "/settings/notifications", icon: Bell, label: "Notifications" },
     { icon: Moon, label: "Appearance", trailing: "System", disabled: true },
     { icon: ShieldCheck, label: "Privacy & security", disabled: true },
     { icon: HelpCircle, label: "Help & feedback", disabled: true },
