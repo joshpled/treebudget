@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   title: "treebudget",
   description: "A calm, three-account budget app.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "treebudget",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
