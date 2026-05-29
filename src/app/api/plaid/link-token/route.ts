@@ -18,6 +18,18 @@ export async function POST(_req: NextRequest) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tier")
+    .eq("id", user.id)
+    .single();
+  if (profile?.tier === "free") {
+    return NextResponse.json(
+      { error: "Upgrade to connect your bank." },
+      { status: 403 },
+    );
+  }
+
   const plaid = getPlaidClient();
   try {
     const res = await plaid.linkTokenCreate({

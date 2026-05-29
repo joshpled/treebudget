@@ -1,0 +1,1 @@
+export const FREE_TRANSACTION_LIMIT = 50;

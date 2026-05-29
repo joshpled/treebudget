@@ -1,39 +1,37 @@
 import type { Metadata } from "next";
-import { PricingCard } from "./PricingCard";
+import { PricingCards } from "./PricingCards";
 
 export const metadata: Metadata = {
   title: "Pricing · treebudget",
   description:
-    "One plan, full access. $9.99 a month or $99 a year. Bank sync, unlimited transactions and goals, all the calm.",
+    "Start free. Upgrade for bank sync, unlimited transactions, savings goals, and auto income split.",
 };
 
 export default function PricingPage() {
   return (
     <section className="hero-glow">
-      <div className="mx-auto max-w-3xl px-5 pb-20 pt-16 sm:pt-24 lg:px-8">
+      <div className="mx-auto max-w-4xl px-5 pb-20 pt-16 sm:pt-24 lg:px-8">
         <div className="text-center">
           <div className="rise text-[12px] font-medium uppercase tracking-wider text-primary">
             Pricing
           </div>
           <h1 className="rise rise-delay-1 mt-2 text-[36px] font-semibold tracking-tight sm:text-[44px]">
-            One plan, full access.
+            Start free. Upgrade when ready.
           </h1>
           <p className="rise rise-delay-2 mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Bank sync, unlimited transactions, unlimited goals, the full
-            three-account model, and the setup guide that helps you make it
-            real at your bank.
+            The free tier gives you the three-account model and manual
+            tracking. Paid unlocks bank sync, goals, and auto income split.
           </p>
         </div>
 
         <div className="rise rise-delay-3 mt-12">
-          <PricingCard />
+          <PricingCards />
         </div>
 
         <div className="rise rise-delay-4 mx-auto mt-10 max-w-xl space-y-4 text-[14px] leading-relaxed text-muted">
-          <Faq q="What's in the plan?">
-            Everything in treebudget. There&apos;s only one tier on purpose —
-            no upsells, no feature gating. Pay monthly or save by paying
-            yearly.
+          <Faq q="Can I upgrade later?">
+            Yes. Start on the free tier and upgrade anytime from the pricing
+            page. Your data carries over.
           </Faq>
           <Faq q="Can I cancel anytime?">
             Yes. Cancel from Settings; you keep access through the end of

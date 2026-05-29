@@ -81,6 +81,20 @@ export async function completeOnboarding(
 }
 
 /**
+ * Set the tier for the currently signed-in test account via the dev-only
+ * API endpoint. Must be called after signIn().
+ */
+export async function setTier(page: Page, tier: "free" | "paid") {
+  const baseURL = process.env.E2E_BASE_URL as string;
+  const res = await page.request.post(`${baseURL}/api/test/set-tier`, {
+    data: { tier },
+  });
+  if (!res.ok()) {
+    throw new Error(`setTier failed: ${res.status()} ${await res.text()}`);
+  }
+}
+
+/**
  * Trigger Load demo data from Settings → Account. Ends on /dashboard with
  * ~80 transactions and 3 goals seeded.
  */

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { getTransaction } from "@/lib/db/transactions";
 import { getAccount, listAccounts } from "@/lib/db/accounts";
+import { getCurrentProfile } from "@/lib/db/profile";
 import { SplitToggle } from "@/components/transactions/SplitToggle";
 import { EditTransactionLauncher } from "./EditTransactionLauncher";
 import { formatCurrency, formatMonthDay } from "@/lib/format";
@@ -31,12 +32,13 @@ export default async function TransactionDetailPage({
     );
   }
 
-  const [account, allAccounts, parent] = await Promise.all([
+  const [account, allAccounts, parent, profile] = await Promise.all([
     getAccount(txn.account_id),
     listAccounts(),
     txn.parent_transaction_id
       ? getTransaction(txn.parent_transaction_id)
       : Promise.resolve(null),
+    getCurrentProfile(),
   ]);
 
   const amount = Number(txn.amount);
@@ -82,7 +84,7 @@ export default async function TransactionDetailPage({
           </div>
         </section>
 
-        {isIncome && coreAccounts.length === 3 ? (
+        {isIncome && coreAccounts.length === 3 && profile?.tier === "paid" ? (
           <SplitToggle
             transactionId={txn.id}
             splitApplied={txn.split_applied}

@@ -8,6 +8,7 @@ import { getPlaidClient } from "@/lib/plaid";
 import { decryptToken } from "@/lib/crypto";
 import { safePlaidError } from "@/lib/plaid/errors";
 import { buildDemoBundle } from "@/lib/demo/seed";
+import { FREE_TRANSACTION_LIMIT } from "@/lib/tier";
 
 const splitSchema = z
   .object({
@@ -89,6 +90,23 @@ export async function addTransaction(input: AddTransactionInput) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tier")
+    .eq("id", user.id)
+    .single();
+  if (profile?.tier === "free") {
+    const { count } = await supabase
+      .from("transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if ((count ?? 0) >= FREE_TRANSACTION_LIMIT) {
+      throw new Error(
+        `Free accounts are limited to ${FREE_TRANSACTION_LIMIT} transactions. Upgrade to add more.`,
+      );
+    }
+  }
 
   const postedAt = parsed.posted_at ?? new Date().toISOString();
 
@@ -303,6 +321,15 @@ export async function applyIncomeSplit(input: { transaction_id: string }) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tier")
+    .eq("id", user.id)
+    .single();
+  if (profile?.tier === "free") {
+    throw new Error("Upgrade to use income splitting.");
+  }
 
   const { data: txn, error: txnErr } = await supabase
     .from("transactions")

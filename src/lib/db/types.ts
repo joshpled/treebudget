@@ -19,6 +19,7 @@ export type Profile = {
   full_name: string | null;
   display_name: string | null;
   monthly_income: number;
+  tier: "free" | "paid";
   onboarded_at: string | null;
   setup_steps: SetupSteps;
   setup_dismissed_at: string | null;

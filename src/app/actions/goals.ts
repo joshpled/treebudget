@@ -21,6 +21,16 @@ export async function createGoal(input: z.input<typeof createSchema>) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tier")
+    .eq("id", user.id)
+    .single();
+  if (profile?.tier === "free") {
+    throw new Error("Upgrade to create savings goals.");
+  }
+
   const { error } = await supabase.from("goals").insert({
     user_id: user.id,
     name: parsed.name,
