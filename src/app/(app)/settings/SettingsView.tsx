@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ResetAccountButton } from "@/components/ResetAccountButton";
 import { DemoDataButton } from "@/components/DemoDataButton";
+import { PlanSection } from "./PlanSection";
 import type { Account } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
@@ -33,9 +34,11 @@ type Props = {
   email: string | null;
   income: number;
   accounts: Account[];
+  tier: "free" | "paid";
+  hasStripeCustomer: boolean;
 };
 
-export function SettingsView({ displayName, email, income, accounts }: Props) {
+export function SettingsView({ displayName, email, income, accounts, tier, hasStripeCustomer }: Props) {
   const bills = accounts.find((a) => a.kind === "bills");
   const spending = accounts.find((a) => a.kind === "spending");
   const savings = accounts.find((a) => a.kind === "savings");
@@ -97,6 +100,12 @@ export function SettingsView({ displayName, email, income, accounts }: Props) {
               <Row key={item.label} item={item} />
             ))}
           </Section>
+
+          <div className="lg:col-span-2">
+            <Section title="Plan">
+              <PlanSection tier={tier} hasStripeCustomer={hasStripeCustomer} />
+            </Section>
+          </div>
 
           <div className="lg:col-span-2">
             <Section title="Account">

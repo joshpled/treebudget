@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight, Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { FREE_TRANSACTION_LIMIT } from "@/lib/tier";
 
@@ -32,12 +32,44 @@ const PAID_FEATURES = [
   "Demo mode",
 ];
 
-export function PricingCards() {
+type Props = {
+  isLoggedIn: boolean;
+  tier: "free" | "paid" | null;
+};
+
+export function PricingCards({ isLoggedIn, tier }: Props) {
   const [cycle, setCycle] = useState<Cycle>("monthly");
+  const [loading, setLoading] = useState(false);
 
   const price = cycle === "monthly" ? "$9.99" : "$99";
   const per = cycle === "monthly" ? "/month" : "/year";
   const monthlyEquivalent = cycle === "yearly" ? "≈ $8.25 / month" : null;
+
+  async function handleCheckout() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: cycle }),
+      });
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch {
+      setLoading(false);
+    }
+  }
+
+  async function handlePortal() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -70,13 +102,31 @@ export function PricingCards() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/sign-up"
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-bg px-4 py-3.5 text-[15px] font-semibold text-ink shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99]"
-          >
-            Get started free
-            <ArrowRight size={16} />
-          </Link>
+          {isLoggedIn ? (
+            tier === "free" ? (
+              <div className="mt-4 flex w-full items-center justify-center rounded-2xl border border-border bg-bg px-4 py-3.5 text-[15px] font-semibold text-muted">
+                Current plan
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handlePortal}
+                disabled={loading}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-bg px-4 py-3.5 text-[15px] font-semibold text-ink shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              >
+                {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+                Manage subscription
+              </button>
+            )
+          ) : (
+            <Link
+              href="/sign-up"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-bg px-4 py-3.5 text-[15px] font-semibold text-ink shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            >
+              Get started free
+              <ArrowRight size={16} />
+            </Link>
+          )}
         </div>
       </div>
 
@@ -131,14 +181,38 @@ export function PricingCards() {
               </li>
             ))}
           </ul>
-          <Link
-            href={`/sign-up?plan=${cycle}`}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99]"
-          >
-            Get full access — {price}{per}
-            <ArrowRight size={16} />
-          </Link>
-          <p className="text-center text-[12px] text-muted">Cancel anytime</p>
+          {isLoggedIn ? (
+            tier === "paid" ? (
+              <div className="mt-4 flex w-full items-center justify-center rounded-2xl bg-primary/20 px-4 py-3.5 text-[15px] font-semibold text-primary-ink">
+                Current plan
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <>
+                    Upgrade — {price}{per}
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            )
+          ) : (
+            <Link
+              href={`/sign-up?plan=${cycle}`}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-[15px] font-semibold text-white shadow-card transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            >
+              Get full access — {price}{per}
+              <ArrowRight size={16} />
+            </Link>
+          )}
+          <p className="text-center text-[12px] text-muted">Cancel anytime · Promo codes accepted at checkout</p>
         </div>
       </div>
     </div>

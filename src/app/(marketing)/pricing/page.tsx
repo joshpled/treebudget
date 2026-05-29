@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/db/profile";
 import { PricingCards } from "./PricingCards";
 
 export const metadata: Metadata = {
@@ -7,7 +9,16 @@ export const metadata: Metadata = {
     "Start free. Upgrade for bank sync, unlimited transactions, savings goals, and auto income split.",
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const profile = user ? await getCurrentProfile() : null;
+  const isLoggedIn = !!user;
+  const tier = profile?.tier ?? null;
+
   return (
     <section className="hero-glow">
       <div className="mx-auto max-w-4xl px-5 pb-20 pt-16 sm:pt-24 lg:px-8">
@@ -25,7 +36,7 @@ export default function PricingPage() {
         </div>
 
         <div className="rise rise-delay-3 mt-12">
-          <PricingCards />
+          <PricingCards isLoggedIn={isLoggedIn} tier={tier} />
         </div>
 
         <div className="rise rise-delay-4 mx-auto mt-10 max-w-xl space-y-4 text-[14px] leading-relaxed text-muted">

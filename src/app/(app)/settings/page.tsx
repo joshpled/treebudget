@@ -29,6 +29,8 @@ export default async function SettingsPage() {
       email={email}
       income={Number(profile?.monthly_income ?? 0)}
       accounts={accounts}
+      tier={profile?.tier ?? "free"}
+      hasStripeCustomer={!!profile?.stripe_customer_id}
     />
   );
 }

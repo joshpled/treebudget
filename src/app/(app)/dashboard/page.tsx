@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ChevronRight, Sparkles, Plus } from "lucide-react";
 import { PushTestButton } from "@/components/PushTestButton";
+import { UpgradedBanner } from "@/components/UpgradedBanner";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
 import { SplitDonut } from "@/components/SplitDonut";
@@ -70,6 +72,10 @@ export default async function HomePage() {
         }
       />
       <div className="mx-auto w-full max-w-md lg:max-w-6xl lg:px-8">
+        <Suspense>
+          <UpgradedBanner />
+        </Suspense>
+
         <section className="px-4 pb-2 pt-5 lg:px-0 lg:pt-8">
           <div className="text-[13px] text-muted">
             {greeting()}, {firstName}.
