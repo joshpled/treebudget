@@ -106,6 +106,17 @@ export function SignUpForm({ next }: Props) {
         {loading ? <Spinner /> : null}
         {loading ? "Creating your account…" : "Create account"}
       </button>
+      <p className="px-1 text-center text-[12px] leading-relaxed text-muted">
+        By creating an account you agree to our{" "}
+        <a href="/terms" className="text-primary hover:underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="/privacy" className="text-primary hover:underline">
+          Privacy Policy
+        </a>
+        .
+      </p>
     </form>
   );
 }
