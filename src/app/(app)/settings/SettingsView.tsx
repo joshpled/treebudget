@@ -36,9 +36,11 @@ type Props = {
   accounts: Account[];
   tier: "free" | "paid";
   hasStripeCustomer: boolean;
+  cancelAtPeriodEnd: boolean;
+  cancelAt: string | null;
 };
 
-export function SettingsView({ displayName, email, income, accounts, tier, hasStripeCustomer }: Props) {
+export function SettingsView({ displayName, email, income, accounts, tier, hasStripeCustomer, cancelAtPeriodEnd, cancelAt }: Props) {
   const bills = accounts.find((a) => a.kind === "bills");
   const spending = accounts.find((a) => a.kind === "spending");
   const savings = accounts.find((a) => a.kind === "savings");
@@ -103,7 +105,12 @@ export function SettingsView({ displayName, email, income, accounts, tier, hasSt
 
           <div className="lg:col-span-2">
             <Section title="Plan">
-              <PlanSection tier={tier} hasStripeCustomer={hasStripeCustomer} />
+              <PlanSection
+                tier={tier}
+                hasStripeCustomer={hasStripeCustomer}
+                cancelAtPeriodEnd={cancelAtPeriodEnd}
+                cancelAt={cancelAt}
+              />
             </Section>
           </div>
 

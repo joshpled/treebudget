@@ -47,6 +47,10 @@ export async function POST(req: NextRequest) {
         tier: isPaid ? "paid" : "free",
         stripe_subscription_status: sub.status,
         stripe_subscription_id: sub.id,
+        cancel_at_period_end: sub.cancel_at_period_end,
+        cancel_at: sub.cancel_at
+          ? new Date(sub.cancel_at * 1000).toISOString()
+          : null,
       })
       .eq("stripe_customer_id", customerId);
   }
@@ -61,6 +65,8 @@ export async function POST(req: NextRequest) {
         tier: "free",
         stripe_subscription_status: "canceled",
         stripe_subscription_id: null,
+        cancel_at_period_end: false,
+        cancel_at: null,
       })
       .eq("stripe_customer_id", customerId);
   }

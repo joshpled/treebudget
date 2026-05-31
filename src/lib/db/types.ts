@@ -23,6 +23,8 @@ export type Profile = {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   stripe_subscription_status: string | null;
+  cancel_at_period_end: boolean;
+  cancel_at: string | null;
   onboarded_at: string | null;
   setup_steps: SetupSteps;
   setup_dismissed_at: string | null;

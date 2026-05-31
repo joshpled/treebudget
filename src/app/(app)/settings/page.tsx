@@ -31,6 +31,8 @@ export default async function SettingsPage() {
       accounts={accounts}
       tier={profile?.tier ?? "free"}
       hasStripeCustomer={!!profile?.stripe_customer_id}
+      cancelAtPeriodEnd={profile?.cancel_at_period_end ?? false}
+      cancelAt={profile?.cancel_at ?? null}
     />
   );
 }
