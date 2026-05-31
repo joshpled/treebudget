@@ -52,11 +52,14 @@ export default function MarketingLayout({
             <Link href="/pricing" className="hover:text-ink">
               Pricing
             </Link>
+            <Link href="/privacy" className="hover:text-ink">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-ink">
+              Terms
+            </Link>
             <Link href="/sign-in" className="hover:text-ink">
               Sign in
-            </Link>
-            <Link href="/sign-up" className="hover:text-ink">
-              Get started
             </Link>
           </div>
         </div>

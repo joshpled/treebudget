@@ -5,6 +5,8 @@ import { getSupabaseEnv } from "./env";
 const PUBLIC_PATHS = [
   "/",
   "/pricing",
+  "/privacy",
+  "/terms",
   "/sign-in",
   "/sign-up",
   "/auth/callback",
