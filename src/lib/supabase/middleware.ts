@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/auth/sign-out",
   "/check-email",
   "/api/plaid/webhook",
+  "/api/stripe/webhook",
 ];
 
 // Marketing pages a signed-in user shouldn't sit on — bump them to the app.
