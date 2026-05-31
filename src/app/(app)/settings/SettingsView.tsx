@@ -73,7 +73,7 @@ export function SettingsView({ displayName, email, income, accounts, tier, hasSt
 
   const appSection: Item[] = [
     { href: "/settings/notifications", icon: Bell, label: "Notifications" },
-    { icon: Moon, label: "Appearance", trailing: "System", disabled: true },
+    { href: "/settings/appearance", icon: Moon, label: "Appearance" },
     { href: "/privacy", icon: ShieldCheck, label: "Privacy & terms" },
     { icon: HelpCircle, label: "Help & feedback", disabled: true },
   ];

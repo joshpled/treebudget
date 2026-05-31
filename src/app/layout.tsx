@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { RouteProgress } from "@/components/RouteProgress";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,10 +32,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Prevent flash of wrong theme before React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('treebudget-theme');var d=document.documentElement;if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){d.classList.add('dark')}}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="min-h-screen">
-        <ServiceWorkerRegistration />
-        <RouteProgress />
-        {children}
+        <ThemeProvider>
+          <ServiceWorkerRegistration />
+          <RouteProgress />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
