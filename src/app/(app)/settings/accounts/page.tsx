@@ -5,7 +5,6 @@ import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaidLinkButton } from "@/components/plaid/PlaidLinkButton";
 import { BankLinkRow } from "@/components/plaid/BankLinkRow";
-import { FireTestWebhookButton } from "@/components/plaid/FireTestWebhookButton";
 import { listAccounts } from "@/lib/db/accounts";
 import { listBankLinks } from "@/lib/db/bank_links";
 import { getCurrentProfile } from "@/lib/db/profile";
@@ -26,7 +25,6 @@ export default async function AccountsPage() {
     listBankLinks(),
     getCurrentProfile(),
   ]);
-  const isSandbox = (process.env.PLAID_ENV ?? "sandbox") === "sandbox";
   const isPaid = profile?.tier === "paid";
 
   return (
@@ -97,12 +95,9 @@ export default async function AccountsPage() {
             />
           ))}
           {isPaid ? (
-            <>
-              <PlaidLinkButton
-                label={links.length === 0 ? "Connect a bank" : "Connect another bank"}
-              />
-              {isSandbox && links.length > 0 ? <FireTestWebhookButton /> : null}
-            </>
+            <PlaidLinkButton
+              label={links.length === 0 ? "Connect a bank" : "Connect another bank"}
+            />
           ) : (
             <div className="rounded-2xl border border-border bg-surface p-4 text-center">
               <p className="text-[14px] font-semibold text-ink">Bank sync is a paid feature.</p>

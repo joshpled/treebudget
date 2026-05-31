@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ChevronRight, Sparkles, Plus } from "lucide-react";
-import { PushTestButton } from "@/components/PushTestButton";
 import { UpgradedBanner } from "@/components/UpgradedBanner";
 import { TopBar } from "@/components/TopBar";
 import { AccountCard } from "@/components/AccountCard";
@@ -129,7 +128,7 @@ export default async function HomePage() {
             </p>
             <p className="mt-1 text-[13px] text-muted">
               Add your first transaction or connect a bank to pull in real
-              activity. Or load demo data to see the app in action.
+              activity.
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               <AddTransactionLauncher accounts={accounts} />
@@ -139,12 +138,6 @@ export default async function HomePage() {
               >
                 <Plus size={14} className="-mt-0.5 mr-1 inline" />
                 Connect a bank
-              </Link>
-              <Link
-                href="/settings"
-                className="rounded-full border border-border bg-bg px-4 py-2 text-[13px] font-medium text-ink"
-              >
-                Load demo data
               </Link>
             </div>
           </section>
@@ -210,12 +203,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        <div className="mx-4 mt-6 flex items-center gap-3 lg:mx-0">
-          <span className="text-[12px] uppercase tracking-wide text-muted">
-            Dev
-          </span>
-          <PushTestButton />
-        </div>
+
 
         <div className="h-8 lg:h-12" />
       </div>

@@ -4,7 +4,6 @@ import {
   Banknote,
   Wallet,
   Link2,
-  Bell,
   Moon,
   ShieldCheck,
   HelpCircle,
@@ -15,7 +14,6 @@ import { TopBar } from "@/components/TopBar";
 import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ResetAccountButton } from "@/components/ResetAccountButton";
-import { DemoDataButton } from "@/components/DemoDataButton";
 import { PlanSection } from "./PlanSection";
 import type { Account } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -72,7 +70,6 @@ export function SettingsView({ displayName, email, income, accounts, tier, hasSt
   ];
 
   const appSection: Item[] = [
-    { href: "/settings/notifications", icon: Bell, label: "Notifications" },
     { icon: Moon, label: "Appearance", trailing: "System", disabled: true },
     { icon: ShieldCheck, label: "Privacy & security", disabled: true },
     { icon: HelpCircle, label: "Help & feedback", disabled: true },
@@ -110,7 +107,6 @@ export function SettingsView({ displayName, email, income, accounts, tier, hasSt
           <div className="lg:col-span-2">
             <Section title="Account">
               <SignOutButton />
-              <DemoDataButton />
               <ResetAccountButton />
             </Section>
           </div>
